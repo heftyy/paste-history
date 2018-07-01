@@ -1,0 +1,3 @@
+#define PasteHistory_VERSION_MAJOR @VERSION_MAJOR@
+#define PasteHistory_VERSION_MINOR @VERSION_MINOR@
+#define PasteHistory_VERSION_PATCH @VERSION_PATCH@

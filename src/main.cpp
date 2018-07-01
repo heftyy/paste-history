@@ -1,34 +1,32 @@
-#include <chrono>
-#include <thread>
+#include <QApplication>
+#include <QDebug>
+#include <QFile>
 
-#include <FuzzySearch.h>
+#include <Config/PasteHistoryConfig.h>
+
+#include <PasteHistory/PasteHistoryWindow.h>
 
 int main(int argc, char** argv)
 {
-	std::vector<std::string> original_files = {
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-		"e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-		"e:/libs/otherlib/main/source/CMakeLists.txt",
-	};
+	QApplication app(argc, argv);
+	QApplication::setApplicationName("Paste history");
+	QApplication::setApplicationVersion(QString("%1.%2.%3").arg(PasteHistory_VERSION_MAJOR).arg(PasteHistory_VERSION_MINOR).arg(PasteHistory_VERSION_PATCH));
 
-	std::vector<std::string> files;
-
-	for (int i = 0; i < 1000000; ++i)
+	QFile style_sheet(":style/style.qss");
+	if (!style_sheet.exists())
 	{
-		files.insert(files.end(), original_files.begin(), original_files.end());
+		qWarning() << "Unable to set stylesheet, file not found\n";
+	}
+	else
+	{
+		style_sheet.open(QFile::ReadOnly | QFile::Text);
+		QTextStream ts(&style_sheet);
+		QString output = ts.readAll();
+		app.setStyleSheet(output);
 	}
 
-	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", files, FuzzySearch::MatchMode::E_FILENAMES);
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	PasteHistoryWindow paste_history_window(app.activeWindow());
+	paste_history_window.Start();
 
-	size_t length = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	return 0;
+	return app.exec();
 }

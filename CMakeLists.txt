@@ -35,7 +35,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(Qt5Network REQUIRED)
+find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
 add_subdirectory(src)
@@ -54,7 +54,6 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugins/platforms
 
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Cored.dll                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
-        COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Networkd.dll                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Testd.dll                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Guid.dll                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
@@ -62,7 +61,6 @@ if(WIN32)
 
         # release version
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Core.dll                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
-        COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Network.dll                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgets.dll                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Test.dll                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Gui.dll                     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
@@ -70,7 +68,6 @@ if(WIN32)
 
 		# release with debug info version
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Core.dll                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
-        COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Network.dll                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgets.dll                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Test.dll                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Gui.dll                     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo

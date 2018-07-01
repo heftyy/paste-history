@@ -4,18 +4,19 @@
 
 #include <FuzzySearch.h>
 
-TEST(FuzzySearchTest, SourceFiles) {
+TEST(FuzzySearchTest, SourceFiles)
+{
 	std::vector<std::string> files = {
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-		"e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-		"e:/libs/otherlib/main/source/CMakeLists.txt",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
+	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
+	    "e:/libs/otherlib/main/source/CMakeLists.txt",
 	};
 
 	{
@@ -49,18 +50,19 @@ TEST(FuzzySearchTest, SourceFiles) {
 	}
 }
 
-TEST(FuzzySearchTest, Filenames) {
+TEST(FuzzySearchTest, Filenames)
+{
 	std::vector<std::string> files = {
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-		"e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-		"e:/libs/otherlib/main/source/CMakeLists.txt",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
+	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
+	    "e:/libs/otherlib/main/source/CMakeLists.txt",
 	};
 
 	{
@@ -92,14 +94,15 @@ TEST(FuzzySearchTest, Filenames) {
 	}
 }
 
-TEST(FuzzySearchTest, Strings) {
+TEST(FuzzySearchTest, Strings)
+{
 	std::vector<std::string> files = {
-		"git init",
-		"git status",
-		"git add my_new_file.txt",
-		"git commit -m \"Add three files\"",
-		"git reset --soft HEAD^",
-		"git remote add origin https://github.com/heftyy/fuzzy-search.git",
+	    "git init",
+	    "git status",
+	    "git add my_new_file.txt",
+	    "git commit -m \"Add three files\"",
+	    "git reset --soft HEAD^",
+	    "git remote add origin https://github.com/heftyy/fuzzy-search.git",
 	};
 
 	{
@@ -121,18 +124,19 @@ TEST(FuzzySearchTest, Strings) {
 	}
 }
 
-TEST(FuzzySearchTest, Benchmark) {
+TEST(FuzzySearchTest, Benchmark)
+{
 	std::vector<std::string> original_files = {
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-		"e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-		"e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-		"e:/libs/otherlib/main/source/CMakeLists.txt",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
+	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
+	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
+	    "e:/libs/otherlib/main/source/CMakeLists.txt",
 	};
 
 	std::vector<std::string> files;
