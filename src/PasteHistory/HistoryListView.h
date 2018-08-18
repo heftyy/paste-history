@@ -1,36 +1,41 @@
 #pragma once
 
-#include <QListWidget>
-#include <QListWidgetItem>
+#include <QStandardItem>
 #include <QString>
+#include <QTableView>
 
 #include <string>
 #include <vector>
 
-class HistoryListViewItem : public QListWidgetItem
+namespace HistoryListViewConstants
 {
-public:
-	HistoryListViewItem(QString text, size_t timestamp, QListWidget* list_widget);
+const int DISPLAY_STRING_MAX_LENGTH = 40;
+const int HISTORY_ITEM_DATA_ROLE = Qt::UserRole + 1;
+} // namespace HistoryListViewConstants
 
-private:
-	struct HistoryItem* m_HistoryItem;
+struct HistoryItemData
+{
+	std::string m_Text;
+	size_t m_TextHash;
+	size_t m_Timestamp;
 };
 
-class HistoryListView : public QListWidget
+class HistoryViewItem : public QStandardItem
+{
+public:
+	HistoryViewItem(HistoryItemData* item_data);
+
+private:
+	HistoryItemData* m_HistoryItemData;
+};
+
+class HistoryView : public QTableView
 {
 	Q_OBJECT
 public:
-	HistoryListView(class QWidget* parent);
+	HistoryView(class QWidget* parent);
 	void AddToHistory(QString text);
 
 private:
-	struct HistoryItem
-	{
-		std::string m_Text;
-		size_t m_TextHash;
-		size_t m_Timestamp;
-		HistoryListViewItem* m_ListViewItem;
-	};
-
-	std::vector<HistoryItem> m_History;
+	std::vector<HistoryItemData> m_History;
 };

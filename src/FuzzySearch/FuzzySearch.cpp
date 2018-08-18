@@ -15,11 +15,11 @@ struct PatternMatch
 int CalculateScore(const std::string& pattern, const std::string& str, int pattern_index, int str_index, int filename_start_index, MatchMode match_mode,
                    const std::vector<int>& matches, int matches_length)
 {
-	const int sequential_bonus = 20;   // bonus for adjacent matches
-	const int separator_bonus = 20;    // bonus if match occurs after a separator
-	const int camel_bonus = 25;        // bonus if match is uppercase and prev is lower
-	const int first_letter_bonus = 25; // bonus if the first letter is matched
-	const int filename_bonus = 15;     // bonus if the match is in the filename instead of the path
+	const int sequential_bonus = 20;         // bonus for adjacent matches
+	const int separator_bonus = 20;          // bonus if match occurs after a separator
+	const int camel_bonus = 25;              // bonus if match is uppercase and prev is lower
+	const int first_letter_bonus = 25;       // bonus if the first letter is matched
+	const int filename_bonus = 15;           // bonus if the match is in the filename instead of the path
 
 	const int leading_letter_penalty = -2;   // penalty applied for every letter in str before the first match
 	const int unmatched_letter_penalty = -1; // penalty for every letter that doesn't matter

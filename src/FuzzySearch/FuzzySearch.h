@@ -1,8 +1,8 @@
 // I initially based this on
 // https://blog.forrestthewoods.com/reverse-engineering-sublime-text-s-fuzzy-match-4cffeed33fdb
 // https://medium.com/@Srekel/implementing-a-fuzzy-search-algorithm-for-the-debuginator-cacc349e6c55
-// and ended up making quite a few modifications to the code to matches that i
-// liked better and improved performance
+// and ended up rewriting pretty much all of it from scrach to improve performance
+// and changed match scores to fit my needs
 
 #pragma once
 

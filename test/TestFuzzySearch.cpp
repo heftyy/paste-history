@@ -112,14 +112,14 @@ TEST(FuzzySearchTest, Strings)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("add", files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("add", files, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git add my_new_file.txt", results[0].m_String);
-		ASSERT_EQ("git commit -m \"Add three files\"", results[1].m_String);
-		ASSERT_EQ("git remote add origin https://github.com/heftyy/fuzzy-search.git", results[2].m_String);
+		ASSERT_EQ("git remote add origin https://github.com/heftyy/fuzzy-search.git", results[1].m_String);
+		ASSERT_EQ("git commit -m \"Add three files\"", results[2].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("reset", files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("reset", files, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git reset --soft HEAD^", results[0].m_String);
 	}
 }
@@ -151,5 +151,12 @@ TEST(FuzzySearchTest, Benchmark)
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 	size_t length = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	ASSERT_LT(length, 1000);
+
+#ifdef NDEBUG
+	#define BENCHMARK_MAX_MS 3000
+#else
+	#define BENCHMARK_MAX_MS 30000
+#endif
+
+	ASSERT_LT(length, BENCHMARK_MAX_MS);
 }

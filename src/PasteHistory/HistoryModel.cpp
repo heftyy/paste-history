@@ -1,0 +1,102 @@
+#include "HistoryModel.h"
+#include "HistoryView.h"
+
+#include <QBrush>
+
+#include <FuzzySearch.h>
+
+HistoryModel::HistoryModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{
+}
+
+QVariant HistoryModel::data(const QModelIndex& index, int role) const
+{
+	if (role == Qt::DisplayRole)
+	{
+		QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
+		Q_ASSERT(source_model);
+		Q_ASSERT(source_model->checkIndex(mapToSource(index),
+		                                  QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
+
+		QStandardItem* item = source_model->itemFromIndex(mapToSource(index));
+		HistoryViewItem* history_view_item = static_cast<HistoryViewItem*>(item);
+
+		const HistoryItemData& item_data = history_view_item->GetHistoryItemData();
+
+		QString text = QString::fromStdString(item_data.m_Text);
+		QString display_string = text.simplified();
+		if (display_string.length() > HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH)
+		{
+			display_string.replace(HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH,
+			                       display_string.length() - HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH, "...");
+		}
+
+		return QString(display_string + "|%0|%1").arg(item_data.m_Timestamp).arg(item_data.m_MatchScore);
+	}
+	else if (role == Qt::BackgroundRole)
+	{
+		if (FilteringEnabled())
+		{
+			return QBrush(Qt::green);
+		}
+		else
+		{
+			return QBrush(Qt::white);
+		}
+	}
+	return QSortFilterProxyModel::data(index, role);
+}
+
+void HistoryModel::SetFilterPattern(const QString& pattern)
+{
+	std::string pattern_str = pattern.toStdString();
+	if (m_FilterPattern == pattern_str)
+		return;
+
+	m_FilterPattern = pattern_str;
+	invalidate();
+}
+
+bool HistoryModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
+	QVariant left_variant = sourceModel()->data(left, HistoryListViewConstants::HISTORY_ITEM_DATA_ROLE);
+	QVariant right_variant = sourceModel()->data(right, HistoryListViewConstants::HISTORY_ITEM_DATA_ROLE);
+
+	HistoryItemData* left_item_data = left_variant.value<HistoryItemData*>();
+	HistoryItemData* right_item_data = right_variant.value<HistoryItemData*>();
+
+	if (FilteringEnabled())
+	{
+		return left_item_data->m_MatchScore < right_item_data->m_MatchScore;
+	}
+	else
+	{
+		return left_item_data->m_Timestamp < right_item_data->m_Timestamp;
+	}
+}
+
+bool HistoryModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+	if (!FilteringEnabled())
+	{
+		return true;
+	}
+
+	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
+	QModelIndex index = source_model->index(source_row, 0, source_parent);
+
+	QStandardItem* item = source_model->itemFromIndex(index);
+	HistoryViewItem* history_view_item = static_cast<HistoryViewItem*>(item);
+
+	HistoryItemData& item_data = history_view_item->GetHistoryItemData();
+
+	item_data.m_MatchScore = FuzzySearch::FuzzyMatch(m_FilterPattern, item_data.m_Text, 0, FuzzySearch::MatchMode::E_STRINGS, item_data.m_Matches);
+
+	return item_data.m_MatchScore > 0;
+}
+
+bool HistoryModel::FilteringEnabled() const
+{
+	return m_FilterPattern.size() > 3;
+}
