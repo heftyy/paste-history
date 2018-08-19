@@ -1,4 +1,4 @@
-Simple application keeping track of your copy-paste history
+Simple application for keeping track of your copy-paste history
 ======
 
 toolchains tested:
