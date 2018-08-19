@@ -8,7 +8,7 @@ public:
 	HistoryModel(QObject* parent);
 
 	QVariant data(const QModelIndex& index, int role) const override;
-	void SetFilterPattern(const QString& pattern);
+	bool UpdateFilterPattern(const QString& pattern); //!< Updates the filter pattern and might force a filter and resort, returns true if proxy model changed
 
 protected:
 	bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;

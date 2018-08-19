@@ -26,10 +26,10 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 
 		QString text = QString::fromStdString(item_data.m_Text);
 		QString display_string = text.simplified();
-		if (display_string.length() > HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH)
+		if (display_string.length() > HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH)
 		{
-			display_string.replace(HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH,
-			                       display_string.length() - HistoryListViewConstants::DISPLAY_STRING_MAX_LENGTH, "...");
+			display_string.replace(HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH, display_string.length() - HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH,
+			                       "...");
 		}
 
 		return QString(display_string + "|%0|%1").arg(item_data.m_Timestamp).arg(item_data.m_MatchScore);
@@ -48,20 +48,22 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 	return QSortFilterProxyModel::data(index, role);
 }
 
-void HistoryModel::SetFilterPattern(const QString& pattern)
+bool HistoryModel::UpdateFilterPattern(const QString& pattern)
 {
 	std::string pattern_str = pattern.toStdString();
 	if (m_FilterPattern == pattern_str)
-		return;
+		return false;
 
 	m_FilterPattern = pattern_str;
 	invalidate();
+
+	return true;
 }
 
 bool HistoryModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-	QVariant left_variant = sourceModel()->data(left, HistoryListViewConstants::HISTORY_ITEM_DATA_ROLE);
-	QVariant right_variant = sourceModel()->data(right, HistoryListViewConstants::HISTORY_ITEM_DATA_ROLE);
+	QVariant left_variant = sourceModel()->data(left, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
+	QVariant right_variant = sourceModel()->data(right, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
 
 	HistoryItemData* left_item_data = left_variant.value<HistoryItemData*>();
 	HistoryItemData* right_item_data = right_variant.value<HistoryItemData*>();

@@ -3,9 +3,6 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QDebug>
-#include <QEvent>
-#include <QKeyEvent>
 #include <QLayout>
 #include <QLineEdit>
 #include <QListWidget>
@@ -16,16 +13,17 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	QLayout* main_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
 	m_HistoryView = new HistoryView(this);
+	m_HistoryView->setFocusPolicy(Qt::NoFocus);
 	main_layout->addWidget(m_HistoryView);
 
 	m_LineEdit = new QLineEdit(this);
+	m_LineEdit->setFocusPolicy(Qt::StrongFocus);
+	m_LineEdit->installEventFilter(this);
 	main_layout->addWidget(m_LineEdit);
 
 	QClipboard* clipboard = QApplication::clipboard();
 	connect(clipboard, &QClipboard::dataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
-	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::SetFilterPattern);
-
-	installEventFilter(this);
+	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);
 }
 
 void PasteHistoryWindow::Start()
@@ -36,15 +34,23 @@ void PasteHistoryWindow::Start()
 	m_HistoryView->AddToHistory("blam", 2, 2);
 }
 
+void PasteHistoryWindow::showEvent(QShowEvent* event)
+{
+	m_LineEdit->setFocus();
+}
+
 bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
 {
-	if (event->type() == QEvent::KeyPress)
+	if (QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event))
 	{
-		m_LineEdit->event(event);
-		return true;
+		if (m_HistoryView->IsShortutKey(key_event))
+		{
+			qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
+			return true;
+		}
 	}
 
-	return QDialog::eventFilter(obj, event);
+	return false;
 }
 
 void PasteHistoryWindow::OnClipboardDataChanged()

@@ -7,11 +7,14 @@
 #include <string>
 #include <vector>
 
-namespace HistoryListViewConstants
+#include <QDebug>
+#include <QKeyEvent>
+
+namespace HistoryViewConstants
 {
 const int DISPLAY_STRING_MAX_LENGTH = 40;
 const int HISTORY_ITEM_DATA_ROLE = Qt::UserRole + 1;
-} // namespace HistoryListViewConstants
+} // namespace HistoryViewConstants
 
 struct HistoryItemData
 {
@@ -55,12 +58,10 @@ public:
 	virtual ~HistoryView();
 
 	void AddToHistory(QString text, size_t text_hash, size_t timestamp);
+	bool IsShortutKey(QKeyEvent* key_event);
 
 public Q_SLOTS:
-	void SetFilterPattern(QString pattern);
-
-protected:
-	bool eventFilter(QObject* obj, QEvent* event) override;
+	void UpdateFilterPattern(QString pattern);
 
 private:
 	std::vector<HistoryItemDataPtr> m_History;

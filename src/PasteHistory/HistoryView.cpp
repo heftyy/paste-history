@@ -1,7 +1,6 @@
 #include "HistoryView.h"
 #include "HistoryModel.h"
 
-#include <QKeyEvent>
 #include <QStandardItemModel>
 
 #include <algorithm>
@@ -12,7 +11,7 @@ HistoryViewItem::HistoryViewItem(HistoryItemData* item_data)
 {
 	QVariant variant;
 	variant.setValue(item_data);
-	setData(variant, HistoryListViewConstants::HISTORY_ITEM_DATA_ROLE);
+	setData(variant, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
 
 	setEditable(false);
 }
@@ -56,20 +55,23 @@ void HistoryView::AddToHistory(QString text, size_t text_hash, size_t timestamp)
 	}
 }
 
-void HistoryView::SetFilterPattern(QString pattern)
+bool HistoryView::IsShortutKey(QKeyEvent* key_event)
 {
-	m_HistoryModel->SetFilterPattern(pattern);
-}
-
-bool HistoryView::eventFilter(QObject* obj, QEvent* event)
-{
-	if (event->type() == QEvent::KeyPress)
+	if (key_event->type() == QEvent::KeyPress || key_event->type() == QEvent::KeyRelease)
 	{
-		QKeyEvent* key_event = static_cast<QKeyEvent*>(event);
 		bool control_pressed = key_event->modifiers() & Qt::CTRL;
 		bool number_pressed = key_event->key() >= Qt::Key_0 && key_event->key() <= Qt::Key_9;
+
 		return control_pressed && number_pressed;
 	}
 
-	return QListView::eventFilter(obj, event);
+	return false;
+}
+
+void HistoryView::UpdateFilterPattern(QString pattern)
+{
+	if (m_HistoryModel->UpdateFilterPattern(pattern))
+	{
+		update();
+	}
 }
