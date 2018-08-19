@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 	QApplication::setApplicationName("Paste history");
 	QApplication::setApplicationVersion(QString("%1.%2.%3").arg(PasteHistory_VERSION_MAJOR).arg(PasteHistory_VERSION_MINOR).arg(PasteHistory_VERSION_PATCH));
 
-	QFile style_sheet(":style/style.qss");
+	QFile style_sheet(":/styles/qdarkstyle/style.qss");
 	if (!style_sheet.exists())
 	{
 		qWarning() << "Unable to set stylesheet, file not found\n";

@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.2)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 set(SOURCE_FILES
-		resources/style.qrc
+		resources/res.qrc
 		main.cpp
 		)
 

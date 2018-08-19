@@ -22,6 +22,8 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	m_LineEdit->installEventFilter(this);
 	main_layout->addWidget(m_LineEdit);
 
+	setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+
 	QClipboard* clipboard = QApplication::clipboard();
 	connect(clipboard, &QClipboard::dataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
 	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);

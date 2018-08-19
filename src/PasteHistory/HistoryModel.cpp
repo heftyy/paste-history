@@ -34,17 +34,7 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 
 		return QString(display_string + "|%0|%1").arg(item_data.m_Timestamp).arg(item_data.m_MatchScore);
 	}
-	else if (role == Qt::BackgroundRole)
-	{
-		if (FilteringEnabled())
-		{
-			return QBrush(Qt::green);
-		}
-		else
-		{
-			return QBrush(Qt::white);
-		}
-	}
+
 	return QSortFilterProxyModel::data(index, role);
 }
 
