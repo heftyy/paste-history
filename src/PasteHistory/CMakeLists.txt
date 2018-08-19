@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.2)
 
 project (paste_history_lib)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 QT5_WRAP_UI(UI_HEADERS
         )
 
