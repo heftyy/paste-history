@@ -1,6 +1,7 @@
 #include "HistoryView.h"
 #include "HistoryModel.h"
 
+#include <QKeyEvent>
 #include <QStandardItemModel>
 
 #include <algorithm>

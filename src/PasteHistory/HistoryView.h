@@ -7,9 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <QDebug>
-#include <QKeyEvent>
-
 namespace HistoryViewConstants
 {
 const int DISPLAY_STRING_MAX_LENGTH = 40;

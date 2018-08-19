@@ -6,33 +6,11 @@
 
 #include <PasteHistory/PasteHistoryWindow.h>
 
-#ifndef NDEBUG
-class FilterObject : public QObject
-{
-protected:
-	bool FilterObject::eventFilter(QObject* object, QEvent* event)
-	{
-		//qDebug() << "QApplication::eventFilter " << event;
-		return QObject::event(event);
-
-		if (event->type() == QEvent::KeyPress)
-		{
-			return true;
-		}
-		return false;
-	}
-};
-#endif
-
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 	QApplication::setApplicationName("Paste history");
 	QApplication::setApplicationVersion(QString("%1.%2.%3").arg(PasteHistory_VERSION_MAJOR).arg(PasteHistory_VERSION_MINOR).arg(PasteHistory_VERSION_PATCH));
-
-#ifndef NDEBUG
-	app.installEventFilter(new FilterObject);
-#endif
 
 	QFile style_sheet(":style/style.qss");
 	if (!style_sheet.exists())

@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QKeyEvent>
 #include <QLayout>
 #include <QLineEdit>
 #include <QListWidget>
@@ -45,7 +46,7 @@ bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
 	{
 		if (m_HistoryView->IsShortutKey(key_event))
 		{
-			qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
+			// qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
 			return true;
 		}
 	}
