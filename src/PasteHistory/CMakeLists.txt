@@ -20,7 +20,7 @@ set(PASTE_HISTORY_SOURCE_FILES
 )
 
 add_library(paste_history_lib ${PASTE_HISTORY_SOURCE_FILES})
-target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS}
+target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS})
 if(MSVC)
 	target_compile_options(paste_history_lib PRIVATE /wd4127)
 endif()

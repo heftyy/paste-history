@@ -12,11 +12,11 @@ struct PatternMatch
 	std::vector<int> m_Matches;
 };
 
-constexpr int sequential_bonus = 20;   // bonus for adjacent matches
-constexpr int separator_bonus = 20;    // bonus if match occurs after a separator
-constexpr int camel_bonus = 25;        // bonus if match is uppercase and prev is lower
-constexpr int first_letter_bonus = 25; // bonus if the first letter is matched
-constexpr int filename_bonus = 15;     // bonus if the match is in the filename instead of the path
+constexpr int sequential_bonus = 20;         // bonus for adjacent matches
+constexpr int separator_bonus = 20;          // bonus if match occurs after a separator
+constexpr int camel_bonus = 25;              // bonus if match is uppercase and prev is lower
+constexpr int first_letter_bonus = 25;       // bonus if the first letter is matched
+constexpr int filename_bonus = 15;           // bonus if the match is in the filename instead of the path
 
 constexpr int leading_letter_penalty = -2;   // penalty applied for every letter in str before the first match
 constexpr int unmatched_letter_penalty = -1; // penalty for every letter that doesn't matter
@@ -25,7 +25,7 @@ constexpr int max_leading_letter_penalty = -10;
 
 constexpr int max_unmatched_characters_from_pattern = 1;
 
-int CalculateScore(const std::string& str, size_t filename_start_index, MatchMode match_mode, const std::vector<int>& matches, size_t matches_length)
+int CalculateScore(const std::string& str, int filename_start_index, MatchMode match_mode, const std::vector<int>& matches, int matches_length)
 {
 	int out_score = 25;
 
@@ -38,17 +38,17 @@ int CalculateScore(const std::string& str, size_t filename_start_index, MatchMod
 		}
 	}
 
-	size_t matches_in_filename = 0;
+	int matches_in_filename = 0;
 	int first_match_in_filename = std::numeric_limits<int>::min();
 
 	// Apply ordering bonuses
-	for (size_t i = 0; i < matches_length; ++i)
+	for (int i = 0; i < matches_length; ++i)
 	{
-		size_t curr_index = matches[i];
+		int curr_index = matches[i];
 
 		if (i > 0)
 		{
-			size_t prev_index = matches[i - 1];
+			int prev_index = matches[i - 1];
 
 			// Sequential
 			if (curr_index == (prev_index + 1))
@@ -82,7 +82,7 @@ int CalculateScore(const std::string& str, size_t filename_start_index, MatchMod
 			// Save the first match in the filename
 			if (first_match_in_filename == std::numeric_limits<int>::min())
 			{
-				first_match_in_filename = curr_index;
+				first_match_in_filename = static_cast<int>(curr_index);
 			}
 
 			// Bonus for matching the filename
@@ -107,7 +107,7 @@ int CalculateScore(const std::string& str, size_t filename_start_index, MatchMod
 	return out_score;
 }
 
-int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filename_start_index, MatchMode match_mode, std::vector<int>& out_matches)
+int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches)
 {
 	std::string pattern_lower = pattern;
 	std::string str_lower = str;
@@ -120,7 +120,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 	int str_start = 0;
 
 	// Loop through pattern and str looking for a match
-	for (size_t pattern_index = 0; pattern_index < pattern.length(); ++pattern_index)
+	for (int pattern_index = 0; pattern_index < pattern.length(); ++pattern_index)
 	{
 		pattern_scores[pattern_index].m_Score = 0;
 
@@ -135,12 +135,12 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 			continue;
 		}
 
-		for (size_t str_index = str_start; str_index < str.length(); ++str_index)
+		for (int str_index = str_start; str_index < str.length(); ++str_index)
 		{
-			size_t search_pattern_index = pattern_index;
-			size_t search_str_index = str_index;
+			int search_pattern_index = pattern_index;
+			int search_str_index = str_index;
 
-			for (size_t i = 0; pattern_lower[search_pattern_index] == str_lower[search_str_index]; ++i)
+			for (int i = 0; pattern_lower[search_pattern_index] == str_lower[search_str_index]; ++i)
 			{
 				matches[i] = search_str_index;
 
@@ -183,7 +183,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 	int out_score = 0;
 	int unmatched_characters_from_pattern = 0;
 
-	for (size_t pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
+	for (int pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
 	{
 		const PatternMatch& match = pattern_scores[pattern_index];
 		if (match.m_Score > 0)
@@ -220,10 +220,10 @@ std::vector<SearchResult> Search(const std::string& pattern, const std::vector<s
 
 	for (const std::string& input_string : input_strings)
 	{
-		size_t last_path_separator_index = 0;
+		int last_path_separator_index = 0;
 		if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)
 		{
-			last_path_separator_index = input_string.find_last_of("\\/");
+			last_path_separator_index = static_cast<int>(input_string.find_last_of("\\/"));
 		}
 
 		std::vector<int> matches;
