@@ -1,0 +1,34 @@
+language: cpp
+
+compiler:
+  - gcc
+
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+
+before_install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
+  - sudo apt-get install qtbase5-dev qtdeclarative5-dev
+  - git clone https://github.com/Microsoft/vcpkg.git
+  - cd vcpkg
+  - ./bootstrap-vcpkg.sh
+  - ./vcpkg install protobuf gtest
+  - export VCPKG_CMAKE=$(pwd)/scripts/buildsystems/vcpkg.cmake
+  - cd ..
+before_script:
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_CMAKE
+
+script:
+  - make -j2 && ctest -j2
+
+notifications:
+  email: false
