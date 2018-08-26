@@ -28,11 +28,12 @@ constexpr int max_unmatched_characters_from_pattern = 1;
 int CalculateScore(const std::string& str, int filename_start_index, MatchMode match_mode, const std::vector<int>& matches, int matches_length)
 {
 	int out_score = 25;
+	int str_length = static_cast<int>(str.length());
 
 	if (match_mode == MatchMode::E_SOURCE_FILES)
 	{
 		// Prioritize cpp files
-		if (str[str.length() - 3] == 'c' && str[str.length() - 2] == 'p' && str[str.length() - 1] == 'p')
+		if (str[str_length - 3] == 'c' && str[str_length - 2] == 'p' && str[str_length - 1] == 'p')
 		{
 			out_score += 3;
 		}
@@ -101,7 +102,7 @@ int CalculateScore(const std::string& str, int filename_start_index, MatchMode m
 	out_score += std::max(calculated_leading_letter_penalty, max_leading_letter_penalty);
 
 	// Apply unmatched penalty
-	int unmatched = static_cast<int>(str.length() - filename_start_index - matches_in_filename) / 3;
+	int unmatched = (str_length - filename_start_index - matches_in_filename) / 3;
 	out_score += std::min(unmatched_letter_penalty * unmatched, 0);
 
 	return out_score;
@@ -114,13 +115,16 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 	std::transform(pattern_lower.begin(), pattern_lower.end(), pattern_lower.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
 	std::transform(str_lower.begin(), str_lower.end(), str_lower.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
 
-	std::vector<PatternMatch> pattern_scores(pattern.length());
-	std::vector<int> matches(pattern.length());
+	int pattern_length = static_cast<int>(pattern.length());
+	int str_length = static_cast<int>(str.length());
+
+	std::vector<PatternMatch> pattern_scores(pattern_length);
+	std::vector<int> matches(pattern_length);
 
 	int str_start = 0;
 
 	// Loop through pattern and str looking for a match
-	for (int pattern_index = 0; pattern_index < pattern.length(); ++pattern_index)
+	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
 	{
 		pattern_scores[pattern_index].m_Score = 0;
 
@@ -135,7 +139,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 			continue;
 		}
 
-		for (int str_index = str_start; str_index < str.length(); ++str_index)
+		for (int str_index = str_start; str_index < str_length; ++str_index)
 		{
 			int search_pattern_index = pattern_index;
 			int search_str_index = str_index;
@@ -147,7 +151,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 				search_pattern_index = pattern_index + i + 1;
 				search_str_index = str_index + i + 1;
 
-				if (search_pattern_index >= pattern.length() || search_str_index >= str.length())
+				if (search_pattern_index >= pattern_length || search_str_index >= str_length)
 				{
 					break;
 				}
@@ -183,7 +187,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 	int out_score = 0;
 	int unmatched_characters_from_pattern = 0;
 
-	for (int pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
+	for (uint32_t pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
 	{
 		const PatternMatch& match = pattern_scores[pattern_index];
 		if (match.m_Score > 0)
