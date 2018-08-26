@@ -21,6 +21,7 @@ before_install:
   - ./bootstrap-vcpkg.sh
   - ./vcpkg install protobuf gtest
   - export VCPKG_CMAKE=$(pwd)/scripts/buildsystems/vcpkg.cmake
+  - cd ..
 before_script:
   - mkdir build
   - cd build
