@@ -18,11 +18,9 @@ before_install:
   - sudo apt-get install qtbase5-dev qtdeclarative5-dev
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
-  - pwd
-  - echo $HOME
   - ./bootstrap-vcpkg.sh
-  #- ./vcpkg install protobuf gtest
-  - export VCPKG_CMAKE=$HOME/vcpkg/scripts/buildsystems/vcpkg.cmake
+  - ./vcpkg install protobuf gtest
+  - export VCPKG_CMAKE=$(pwd)/scripts/buildsystems/vcpkg.cmake
 before_script:
   - mkdir build
   - cd build
