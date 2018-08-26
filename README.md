@@ -1,4 +1,5 @@
 Simple application for keeping track of your copy-paste history
+[![Build Status](https://travis-ci.org/heftyy/paste-history.svg?branch=master)](https://travis-ci.org/heftyy/paste-history)
 ======
 
 toolchains tested:
