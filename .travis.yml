@@ -15,8 +15,12 @@ addons:
     packages:
       - g++-7
       - clang-5.0
+  env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - sudo apt-get install qtbase5-dev qtdeclarative5-dev
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
