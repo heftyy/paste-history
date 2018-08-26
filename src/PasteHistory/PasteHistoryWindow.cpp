@@ -8,6 +8,8 @@
 #include <QLineEdit>
 #include <QListWidget>
 
+#include <chrono>
+
 PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
     : QDialog(parent)
 {
