@@ -15,9 +15,6 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::DisplayRole)
 	{
 		QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
-		Q_ASSERT(source_model);
-		Q_ASSERT(source_model->checkIndex(mapToSource(index),
-		                                  QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
 
 		QStandardItem* item = source_model->itemFromIndex(mapToSource(index));
 		HistoryViewItem* history_view_item = static_cast<HistoryViewItem*>(item);
@@ -46,9 +43,6 @@ bool HistoryModel::UpdateFilterPattern(const QString& pattern)
 bool HistoryModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
 	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
-	Q_ASSERT(source_model);
-	Q_ASSERT(source_model->checkIndex(left, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
-	Q_ASSERT(source_model->checkIndex(right, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
 
 	HistoryViewItem* left_item = static_cast<HistoryViewItem*>(source_model->itemFromIndex(left));
 	HistoryViewItem* right_item = static_cast<HistoryViewItem*>(source_model->itemFromIndex(right));
@@ -75,8 +69,6 @@ bool HistoryModel::filterAcceptsRow(int source_row, const QModelIndex& source_pa
 
 	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
 	QModelIndex index = source_model->index(source_row, 0, source_parent);
-	Q_ASSERT(source_model);
-	Q_ASSERT(source_model->checkIndex(index, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
 
 	QStandardItem* item = source_model->itemFromIndex(index);
 	HistoryViewItem* history_view_item = static_cast<HistoryViewItem*>(item);

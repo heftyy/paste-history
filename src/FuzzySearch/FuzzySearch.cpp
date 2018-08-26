@@ -25,7 +25,7 @@ constexpr int max_leading_letter_penalty = -10;
 
 constexpr int max_unmatched_characters_from_pattern = 1;
 
-int CalculateScore(const std::string& str, size_t filename_start_index, MatchMode match_mode, const std::vector<int>& matches, int matches_length)
+int CalculateScore(const std::string& str, size_t filename_start_index, MatchMode match_mode, const std::vector<int>& matches, size_t matches_length)
 {
 	int out_score = 25;
 
@@ -44,11 +44,11 @@ int CalculateScore(const std::string& str, size_t filename_start_index, MatchMod
 	// Apply ordering bonuses
 	for (size_t i = 0; i < matches_length; ++i)
 	{
-		int curr_index = matches[i];
+		size_t curr_index = matches[i];
 
 		if (i > 0)
 		{
-			int prev_index = matches[i - 1];
+			size_t prev_index = matches[i - 1];
 
 			// Sequential
 			if (curr_index == (prev_index + 1))
@@ -120,7 +120,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 	int str_start = 0;
 
 	// Loop through pattern and str looking for a match
-	for (int pattern_index = 0; pattern_index < pattern.length(); ++pattern_index)
+	for (size_t pattern_index = 0; pattern_index < pattern.length(); ++pattern_index)
 	{
 		pattern_scores[pattern_index].m_Score = 0;
 
@@ -135,12 +135,12 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 			continue;
 		}
 
-		for (int str_index = str_start; str_index < str.length(); ++str_index)
+		for (size_t str_index = str_start; str_index < str.length(); ++str_index)
 		{
-			int search_pattern_index = pattern_index;
-			int search_str_index = str_index;
+			size_t search_pattern_index = pattern_index;
+			size_t search_str_index = str_index;
 
-			for (int i = 0; pattern_lower[search_pattern_index] == str_lower[search_str_index]; ++i)
+			for (size_t i = 0; pattern_lower[search_pattern_index] == str_lower[search_str_index]; ++i)
 			{
 				matches[i] = search_str_index;
 
@@ -183,7 +183,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filena
 	int out_score = 0;
 	int unmatched_characters_from_pattern = 0;
 
-	for (int pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
+	for (size_t pattern_index = 0; pattern_index < pattern_scores.size(); ++pattern_index)
 	{
 		const PatternMatch& match = pattern_scores[pattern_index];
 		if (match.m_Score > 0)

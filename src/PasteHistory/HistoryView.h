@@ -1,11 +1,10 @@
 #pragma once
 
-#pragma warning(disable : 4127)
 #include <QListView>
-#pragma warning(default : 4127)
 #include <QStandardItem>
 #include <QString>
 
+#include <memory>
 #include <string>
 #include <vector>
 
