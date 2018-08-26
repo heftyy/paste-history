@@ -28,5 +28,6 @@ int main(int argc, char** argv)
 	PasteHistoryWindow paste_history_window(app.activeWindow());
 	paste_history_window.Start();
 
+
 	return app.exec();
 }

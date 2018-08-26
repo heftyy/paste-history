@@ -7,12 +7,22 @@
 #include <algorithm>
 #include <chrono>
 
-HistoryViewItem::HistoryViewItem(HistoryItemData* item_data)
+HistoryViewItem::HistoryViewItem(HistoryItemData& item_data)
     : m_HistoryItemData(item_data)
 {
 	QVariant variant;
-	variant.setValue(item_data);
+	variant.setValue(&item_data);
 	setData(variant, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
+
+	QString text = QString::fromStdString(item_data.m_Text);
+	QString display_string = text.simplified();
+	if (display_string.length() > HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH)
+	{
+		display_string.replace(HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH, display_string.length() - HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH,
+		                       "...");
+	}
+
+	setData(display_string, Qt::DisplayRole);
 
 	setEditable(false);
 }
@@ -51,7 +61,7 @@ void HistoryView::AddToHistory(QString text, size_t text_hash, size_t timestamp)
 		auto iter = m_History.emplace(found, std::make_unique<HistoryItemData>(text.toStdString(), text_hash, timestamp));
 		int index = std::distance(m_History.begin(), iter);
 
-		HistoryViewItem* history_view_item = new HistoryViewItem(iter->get());
+		HistoryViewItem* history_view_item = new HistoryViewItem(*iter->get());
 		m_SourceModel->insertRow(index, history_view_item);
 	}
 }

@@ -24,14 +24,7 @@ QVariant HistoryModel::data(const QModelIndex& index, int role) const
 
 		const HistoryItemData& item_data = history_view_item->GetHistoryItemData();
 
-		QString text = QString::fromStdString(item_data.m_Text);
-		QString display_string = text.simplified();
-		if (display_string.length() > HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH)
-		{
-			display_string.replace(HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH, display_string.length() - HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH,
-			                       "...");
-		}
-
+		QString display_string = item->data(Qt::DisplayRole).toString();
 		return QString(display_string + "|%0|%1").arg(item_data.m_Timestamp).arg(item_data.m_MatchScore);
 	}
 
@@ -52,19 +45,24 @@ bool HistoryModel::UpdateFilterPattern(const QString& pattern)
 
 bool HistoryModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-	QVariant left_variant = sourceModel()->data(left, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
-	QVariant right_variant = sourceModel()->data(right, HistoryViewConstants::HISTORY_ITEM_DATA_ROLE);
+	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
+	Q_ASSERT(source_model);
+	Q_ASSERT(source_model->checkIndex(left, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
+	Q_ASSERT(source_model->checkIndex(right, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
 
-	HistoryItemData* left_item_data = left_variant.value<HistoryItemData*>();
-	HistoryItemData* right_item_data = right_variant.value<HistoryItemData*>();
+	HistoryViewItem* left_item = static_cast<HistoryViewItem*>(source_model->itemFromIndex(left));
+	HistoryViewItem* right_item = static_cast<HistoryViewItem*>(source_model->itemFromIndex(right));
+
+	HistoryItemData& left_item_data = left_item->GetHistoryItemData();
+	HistoryItemData& right_item_data = right_item->GetHistoryItemData();
 
 	if (FilteringEnabled())
 	{
-		return left_item_data->m_MatchScore < right_item_data->m_MatchScore;
+		return left_item_data.m_MatchScore < right_item_data.m_MatchScore;
 	}
 	else
 	{
-		return left_item_data->m_Timestamp < right_item_data->m_Timestamp;
+		return left_item_data.m_Timestamp < right_item_data.m_Timestamp;
 	}
 }
 
@@ -77,6 +75,8 @@ bool HistoryModel::filterAcceptsRow(int source_row, const QModelIndex& source_pa
 
 	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(sourceModel());
 	QModelIndex index = source_model->index(source_row, 0, source_parent);
+	Q_ASSERT(source_model);
+	Q_ASSERT(source_model->checkIndex(index, QAbstractItemModel::CheckIndexOption::IndexIsValid | QAbstractItemModel::CheckIndexOption::ParentIsInvalid));
 
 	QStandardItem* item = source_model->itemFromIndex(index);
 	HistoryViewItem* history_view_item = static_cast<HistoryViewItem*>(item);
@@ -90,5 +90,5 @@ bool HistoryModel::filterAcceptsRow(int source_row, const QModelIndex& source_pa
 
 bool HistoryModel::FilteringEnabled() const
 {
-	return m_FilterPattern.size() > 3;
+	return m_FilterPattern.size() > 0;
 }

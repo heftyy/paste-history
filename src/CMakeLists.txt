@@ -1,19 +1,21 @@
-cmake_minimum_required(VERSION 3.2)
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+cmake_minimum_required(VERSION 3.8)
 
 set(SOURCE_FILES
 		resources/res.qrc
 		main.cpp
 		)
 
+set(CMAKE_AUTORCC ON)
+
 add_subdirectory(Config)
 add_subdirectory(FuzzySearch)
 add_subdirectory(PasteHistory)
+add_subdirectory(ProtobufTypes)
 
 add_executable(paste_history WIN32 ${SOURCE_FILES})
-target_link_libraries(paste_history paste_history_lib ${QT_QTMAIN_LIBRARY} Qt5::Core Qt5::Widgets)
+target_compile_options(paste_history PRIVATE ${COMPILE_FLAGS})
+target_compile_features(paste_history PRIVATE cxx_std_14)
+target_link_libraries(paste_history PRIVATE paste_history_lib proto)
 
 IF(WIN32) # Check if we are on Windows
   if(MSVC) # Check if we are using the Visual Studio compiler

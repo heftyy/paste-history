@@ -31,8 +31,6 @@ TEST(FuzzySearchTest, SourceFiles)
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhnl", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[1].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[2].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[3].m_String);
 	}
 
 	{
@@ -46,7 +44,6 @@ TEST(FuzzySearchTest, SourceFiles)
 	{
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists node", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[0].m_String);
-		ASSERT_EQ("e:/libs/otherlib/main/source/CMakeLists.txt", results[1].m_String);
 	}
 }
 
@@ -67,10 +64,10 @@ TEST(FuzzySearchTest, Filenames)
 
 	{
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhn", files, FuzzySearch::MatchMode::E_FILENAMES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseEntityNode.h", results[0].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseObjectNode.h", results[1].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp", results[2].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp", results[3].m_String);
+		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[0].m_String);
+		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[1].m_String);
+		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[2].m_String);
+		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[3].m_String);
 	}
 
 	{
@@ -88,9 +85,9 @@ TEST(FuzzySearchTest, Filenames)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists node", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[0].m_String);
-		ASSERT_EQ("e:/libs/otherlib/main/source/CMakeLists.txt", results[1].m_String);
+		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		ASSERT_EQ("e:/libs/otherlib/main/source/CMakeLists.txt", results[0].m_String);
+		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[1].m_String);
 	}
 }
 
@@ -114,8 +111,8 @@ TEST(FuzzySearchTest, Strings)
 	{
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("add", files, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git add my_new_file.txt", results[0].m_String);
-		ASSERT_EQ("git remote add origin https://github.com/heftyy/fuzzy-search.git", results[1].m_String);
-		ASSERT_EQ("git commit -m \"Add three files\"", results[2].m_String);
+		ASSERT_EQ("git commit -m \"Add three files\"", results[1].m_String);
+		ASSERT_EQ("git remote add origin https://github.com/heftyy/fuzzy-search.git", results[2].m_String);
 	}
 
 	{

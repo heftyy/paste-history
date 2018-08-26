@@ -38,13 +38,13 @@ Q_DECLARE_METATYPE(HistoryItemData*)
 class HistoryViewItem : public QStandardItem
 {
 public:
-	HistoryViewItem(HistoryItemData* item);
+	HistoryViewItem(HistoryItemData& item);
 	virtual ~HistoryViewItem();
 
-	inline HistoryItemData& GetHistoryItemData() { return *m_HistoryItemData; }
+	inline HistoryItemData& GetHistoryItemData() { return m_HistoryItemData; }
 
 private:
-	HistoryItemData* m_HistoryItemData;
+	HistoryItemData& m_HistoryItemData;
 };
 
 class HistoryView : public QListView

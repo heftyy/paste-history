@@ -26,10 +26,7 @@ enum class MatchMode
 	E_SOURCE_FILES
 };
 
-int CalculateScore(const std::string& pattern, const std::string& str, int pattern_index, int str_index, int filename_start_index, MatchMode match_mode,
-                   const std::vector<int>& matches, int matches_length);
-
-int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches);
+int FuzzyMatch(const std::string& pattern, const std::string& str, size_t filename_start_index, MatchMode match_mode, std::vector<int>& out_matches);
 
 std::vector<SearchResult> Search(const std::string& expression, const std::vector<std::string>& input_strings, MatchMode match_mode);
 

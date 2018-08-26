@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.8)
 
 project (paste_history_lib)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
 QT5_WRAP_UI(UI_HEADERS
         )
@@ -21,5 +20,8 @@ set(PASTE_HISTORY_SOURCE_FILES
 )
 
 add_library(paste_history_lib ${PASTE_HISTORY_SOURCE_FILES})
-target_link_libraries(paste_history_lib ${QT_QTMAIN_LIBRARY} fuzzy_search_lib Qt5::Core Qt5::Widgets)
+target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS} /wd4127)
+target_compile_features(paste_history_lib PUBLIC cxx_std_14)
+
+target_link_libraries(paste_history_lib PRIVATE fuzzy_search_lib PUBLIC ${QT_QTMAIN_LIBRARY} Qt5::Core Qt5::Widgets)
 target_include_directories(paste_history_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

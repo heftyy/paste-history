@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.8)
 set(PROJECT_NAME_STR paste_history)
 
 # The project version number.
@@ -9,16 +9,13 @@ mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 project(${PROJECT_NAME_STR})
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# Force to always compile with W4 and treat warnings as errors
 if(MSVC)
-    # Force to always compile with W4
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
-    endif()
+    set(COMPILE_FLAGS /W4 /WX)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    # Update if necessary
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+    set(COMPILE_FLAGS -Wall -Werror -Wno-long-long -pedantic)
 endif()
 
 if(UNIX)
@@ -26,7 +23,6 @@ if(UNIX)
 endif(UNIX)
 
 set(EXT_PROJECTS_DIR ${PROJECT_SOURCE_DIR}/ext)
-add_subdirectory(ext/gtest)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
