@@ -20,7 +20,7 @@ set(PASTE_HISTORY_SOURCE_FILES
 )
 
 add_library(paste_history_lib ${PASTE_HISTORY_SOURCE_FILES})
-target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS} /wd4127)
+target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS})
 target_compile_features(paste_history_lib PUBLIC cxx_std_14)
 
 target_link_libraries(paste_history_lib PRIVATE fuzzy_search_lib PUBLIC ${QT_QTMAIN_LIBRARY} Qt5::Core Qt5::Widgets)

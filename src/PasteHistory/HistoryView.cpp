@@ -3,6 +3,7 @@
 
 #include <QKeyEvent>
 #include <QStandardItemModel>
+#include <QVariant>
 
 #include <algorithm>
 #include <chrono>
@@ -18,8 +19,8 @@ HistoryViewItem::HistoryViewItem(HistoryItemData& item_data)
 	QString display_string = text.simplified();
 	if (display_string.length() > HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH)
 	{
-		display_string.replace(HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH, display_string.length() - HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH,
-		                       "...");
+		int display_string_length = display_string.length() - HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH;
+		display_string.replace(HistoryViewConstants::DISPLAY_STRING_MAX_LENGTH, display_string_length, "...");
 	}
 
 	setData(display_string, Qt::DisplayRole);
@@ -59,10 +60,10 @@ void HistoryView::AddToHistory(QString text, size_t text_hash, size_t timestamp)
 	else
 	{
 		auto iter = m_History.emplace(found, std::make_unique<HistoryItemData>(text.toStdString(), text_hash, timestamp));
-		int index = std::distance(m_History.begin(), iter);
+		size_t index = std::distance(m_History.begin(), iter);
 
 		HistoryViewItem* history_view_item = new HistoryViewItem(*iter->get());
-		m_SourceModel->insertRow(index, history_view_item);
+		m_SourceModel->insertRow(static_cast<int>(index), history_view_item);
 	}
 }
 
