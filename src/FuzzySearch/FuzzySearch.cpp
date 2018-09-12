@@ -165,8 +165,7 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 template <typename T_it> 
 inline void SequenceToLowerCase(T_it begin, T_it end)
 {
-	// Convert to upper: clear the '32' bit, 0x20 in hex. And with the
-	// inverted bit string (~).
+	// Convert to lower: add the '32' bit, 0x20 in hex. Or with the bit string.
 	for (auto it = begin; it != end; ++it)
 	{
 		if (*it >= 'A' && *it <= 'Z')
