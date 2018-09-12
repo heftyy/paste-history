@@ -18,10 +18,6 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(COMPILE_FLAGS -Wall -Werror -Wno-long-long -pedantic)
 endif()
 
-if(UNIX)
-    add_definitions(-std=c++14)
-endif(UNIX)
-
 set(EXT_PROJECTS_DIR ${PROJECT_SOURCE_DIR}/ext)
 
 # Find includes in corresponding build directories
@@ -39,6 +35,7 @@ add_subdirectory(src)
 enable_testing()
 
 add_subdirectory(test)
+add_subdirectory(benchmark)
 add_subdirectory(doc)
 
 if(WIN32)
