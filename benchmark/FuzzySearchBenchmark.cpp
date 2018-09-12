@@ -58,7 +58,7 @@ static void BM_FuzzyLongPattern(benchmark::State& state)
 
 	for (auto _ : state)
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", original_files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchynodebase", original_files, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }
@@ -87,7 +87,7 @@ static void BM_FindLongPattern(benchmark::State& state)
 		benchmark::DoNotOptimize(results);
 	}
 }
-//FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
+FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
 
 static void BM_FuzzyShortPattern(benchmark::State& state)
 {
@@ -135,6 +135,6 @@ static void BM_FindShortPattern(benchmark::State& state)
 		benchmark::DoNotOptimize(results);
 	}
 }
-//FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
+FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
 
 BENCHMARK_MAIN();

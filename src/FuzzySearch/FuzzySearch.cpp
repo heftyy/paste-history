@@ -162,6 +162,18 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 	return out_score;
 }
 
+template <typename T_it> 
+inline void SequenceToLowerCase(T_it begin, T_it end)
+{
+	// Convert to upper: clear the '32' bit, 0x20 in hex. And with the
+	// inverted bit string (~).
+	for (auto it = begin; it != end; ++it)
+	{
+		if (*it >= 'A' && *it <= 'Z')
+			*it |= 0x20;
+	}
+}
+
 std::vector<PatternMatch> pattern_matches(256);
 std::vector<int> matched_characater_indexes(256);
 
@@ -169,8 +181,8 @@ int FuzzyMatch(const std::string& original_pattern, const std::string& original_
 {
 	std::string pattern_lower = original_pattern;
 	std::string str_lower = original_str;
-	std::transform(original_pattern.begin(), original_pattern.end(), pattern_lower.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
-	std::transform(original_str.begin(), original_str.end(), str_lower.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
+	SequenceToLowerCase(pattern_lower.begin(), pattern_lower.end());
+	SequenceToLowerCase(str_lower.begin(), str_lower.end());
 
 	out_matches.reserve(pattern_lower.length());
 
