@@ -108,8 +108,8 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 
 inline int FindSequentialMatch(const std::string& pattern, const std::string& str, int pattern_index, int str_index, std::vector<int>& out_matched_str_indexes)
 {
-	int search_pattern_index = pattern_index;
-	int search_str_index = str_index;
+	size_t search_pattern_index = pattern_index;
+	size_t search_str_index = str_index;
 
 	int matched_characters = 0;
 

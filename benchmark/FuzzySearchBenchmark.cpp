@@ -39,7 +39,7 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 	return results;
 }
 
-#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK(##BENCHMARK_NAME)->Repetitions(5)
+#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK( BENCHMARK_NAME )->Repetitions(5)
 
 static void BM_FuzzyLongPattern(benchmark::State& state)
 {
