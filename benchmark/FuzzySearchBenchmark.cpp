@@ -15,7 +15,7 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 		int found_count = 0;
 		for (const std::string& str : split_by_space)
 		{
-			auto found = file.find_first_of(str);
+			auto found = file.find_last_of(str);
 			if (found != std::string::npos)
 			{
 				++found_count;
@@ -58,7 +58,7 @@ static void BM_FuzzyLongPattern(benchmark::State& state)
 
 	for (auto _ : state)
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchynodebase", original_files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", original_files, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }

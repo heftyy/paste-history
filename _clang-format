@@ -11,3 +11,4 @@ BreakBeforeBraces: Allman
 SortIncludes: true
 BreakConstructorInitializers: BeforeComma
 AllowShortFunctionsOnASingleLine: InlineOnly
+AlwaysBreakTemplateDeclarations: true

@@ -111,20 +111,27 @@ inline int FindSequentialMatch(const std::string& pattern, const std::string& st
 	int pattern_length = static_cast<int>(pattern.length());
 	int str_length = static_cast<int>(str.length());
 
-	int matched_characters = 0;
-
-	while (pattern[pattern_index + matched_characters] == str[str_index + matched_characters])
+	for (int matched_characters = 0; pattern_index + matched_characters < pattern_length || str_index + matched_characters < str_length; ++matched_characters)
 	{
-		out_matched_str_indexes[matched_characters] = str_index + matched_characters;
+		int lhs = pattern[pattern_index + matched_characters];
+		int rhs = str[str_index + matched_characters];
 
-		++matched_characters;
-		if (pattern_index + matched_characters >= pattern_length || str_index + matched_characters >= str_length)
+		//lhs = std::tolower(lhs);
+		//rhs = std::tolower(rhs);
+		lhs |= 0x20;
+		rhs |= 0x20;
+
+		if (lhs != rhs)
 		{
-			break;
+			return matched_characters;
+		}
+		else
+		{
+			out_matched_str_indexes[matched_characters] = str_index + matched_characters;
 		}
 	}
 
-	return matched_characters;
+	return 0;
 }
 
 int CalculatePatternScore(const std::string& pattern, const std::vector<PatternMatch>& in_matches, std::vector<int>& out_matches)
@@ -160,7 +167,8 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 	return out_score;
 }
 
-template <typename T_it> inline void SequenceToLowerCase(T_it begin, T_it end)
+template <typename T_it>
+inline void SequenceToLowerCase(T_it begin, T_it end)
 {
 	// Convert to lower: add the '32' bit, 0x20 in hex. Or with the bit string.
 	for (auto it = begin; it != end; ++it)
@@ -171,23 +179,14 @@ template <typename T_it> inline void SequenceToLowerCase(T_it begin, T_it end)
 }
 
 std::vector<PatternMatch> pattern_matches(256);
-std::vector<int> matched_characater_indexes(256);
+std::vector<int> matched_indexes(256);
 
-int FuzzyMatch(const std::string& original_pattern, const std::string& original_str, int filename_start_index, MatchMode match_mode,
-               std::vector<int>& out_matches)
+int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches)
 {
-	std::string pattern_lower = original_pattern;
-	std::string str_lower = original_str;
-	SequenceToLowerCase(pattern_lower.begin(), pattern_lower.end());
-	SequenceToLowerCase(str_lower.begin(), str_lower.end());
+	out_matches.reserve(pattern.length());
 
-	out_matches.reserve(pattern_lower.length());
-
-	int pattern_length = static_cast<int>(pattern_lower.length());
-	int str_length = static_cast<int>(str_lower.length());
-
-	// std::vector<PatternMatch> pattern_matches(pattern_length);
-	// std::vector<int> matched_characater_indexes(pattern_length);
+	int pattern_length = static_cast<int>(pattern.length());
+	int str_length = static_cast<int>(str.length());
 
 	int str_start = 0;
 
@@ -201,7 +200,7 @@ int FuzzyMatch(const std::string& original_pattern, const std::string& original_
 
 		// When pattern contains a space, start a search from the beginning of str
 		// again to allow out of order matches from the pattern
-		if (pattern_lower[pattern_index] == ' ')
+		if (pattern[pattern_index] == ' ')
 		{
 			str_start = 0;
 			continue;
@@ -209,20 +208,18 @@ int FuzzyMatch(const std::string& original_pattern, const std::string& original_
 
 		for (int str_index = str_start; str_index < str_length; ++str_index)
 		{
-			int matched_characters_length = FindSequentialMatch(pattern_lower, str_lower, pattern_index, str_index, matched_characater_indexes);
-
-			if (matched_characters_length > 0)
+			int matched_length = FindSequentialMatch(pattern, str, pattern_index, str_index, matched_indexes);
+			if (matched_length > 0)
 			{
-				int match_score =
-				    CalculateSequentialMatchScore(original_str, filename_start_index, match_mode, matched_characater_indexes, matched_characters_length);
+				int match_score = CalculateSequentialMatchScore(str, filename_start_index, match_mode, matched_indexes, matched_length);
 
 				if (match_score > pattern_matches[pattern_index].m_Score)
 				{
-					best_match_length = matched_characters_length;
+					best_match_length = matched_length;
 
 					PatternMatch& match = pattern_matches[pattern_index];
 					match.m_Score = match_score;
-					match.m_Matches.assign(matched_characater_indexes.begin(), matched_characater_indexes.begin() + best_match_length);
+					match.m_Matches.assign(matched_indexes.begin(), matched_indexes.begin() + best_match_length);
 
 					// Skip searching for matches in str that we already used in our currect best match, doing this to improve performance
 					str_index += best_match_length;
@@ -239,7 +236,7 @@ int FuzzyMatch(const std::string& original_pattern, const std::string& original_
 		}
 	}
 
-	return CalculatePatternScore(pattern_lower, pattern_matches, out_matches);
+	return CalculatePatternScore(pattern, pattern_matches, out_matches);
 }
 
 std::vector<SearchResult> Search(const std::string& pattern, const std::vector<std::string>& input_strings, MatchMode match_mode)
