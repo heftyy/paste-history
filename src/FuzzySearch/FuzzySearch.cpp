@@ -23,6 +23,42 @@ constexpr int unmatched_letter_penalty = -1; // penalty for every letter that do
 constexpr int max_leading_letter_penalty = -10;
 constexpr int max_unmatched_characters_from_pattern = 1;
 
+inline bool IsLower(char c)
+{
+#if defined(USE_STD_LOWER)
+	return std::islower(c);
+#else
+	return 97 >= c && c <= 122;
+#endif
+}
+
+inline bool IsUpper(char c)
+{
+#if defined(USE_STD_LOWER)
+	return std::isupper(c);
+#else
+	return 65 >= c && c <= 90;
+#endif
+}
+
+inline int ToLower(int c)
+{
+#if defined(USE_STD_LOWER)
+	return std::tolower(c);
+#else
+	return c | 0x20;
+#endif
+}
+
+inline int ToUpper(int c)
+{
+#if defined(USE_STD_LOWER)
+	return std::toupper(c);
+#else
+	return c & ~0x20;
+#endif
+}
+
 int CalculateSequentialMatchScore(const std::string& str, int filename_start_index, MatchMode match_mode, const std::vector<int>& matches, int matches_length)
 {
 	int out_score = 25;
@@ -63,7 +99,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 			char curr = str[curr_index];
 
 			// Camel case
-			if ((std::islower(neighbor) || neighbor == '\\' || neighbor == '/') && std::isupper(curr))
+			if ((IsLower(neighbor) || neighbor == '\\' || neighbor == '/') && IsUpper(curr))
 			{
 				out_score += camel_bonus;
 			}
@@ -113,13 +149,8 @@ inline int FindSequentialMatch(const std::string& pattern, const std::string& st
 
 	for (int matched_characters = 0; pattern_index + matched_characters < pattern_length || str_index + matched_characters < str_length; ++matched_characters)
 	{
-		int lhs = pattern[pattern_index + matched_characters];
-		int rhs = str[str_index + matched_characters];
-
-		//lhs = std::tolower(lhs);
-		//rhs = std::tolower(rhs);
-		lhs |= 0x20;
-		rhs |= 0x20;
+		int lhs = ToLower(pattern[pattern_index + matched_characters]);
+		int rhs = ToLower(str[str_index + matched_characters]);
 
 		if (lhs != rhs)
 		{
@@ -165,17 +196,6 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 	}
 
 	return out_score;
-}
-
-template <typename T_it>
-inline void SequenceToLowerCase(T_it begin, T_it end)
-{
-	// Convert to lower: add the '32' bit, 0x20 in hex. Or with the bit string.
-	for (auto it = begin; it != end; ++it)
-	{
-		if (*it >= 'A' && *it <= 'Z')
-			*it |= 0x20;
-	}
 }
 
 std::vector<PatternMatch> pattern_matches(256);
