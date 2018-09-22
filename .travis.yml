@@ -19,16 +19,17 @@ before_install:
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
-  - ./vcpkg install protobuf gtest benchmark
+  - ./vcpkg install protobuf gtest benchmark ms-gsl
   - export VCPKG_CMAKE=$(pwd)/scripts/buildsystems/vcpkg.cmake
   - cd ..
 before_script:
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_CMAKE
+  - cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_CMAKE -DCMAKE_BUILD_TYPE=Release
 
 script:
   - make -j2 && ctest -j2
+  - ./bin/fuzzy_search_benchmark
 
 notifications:
   email: false
