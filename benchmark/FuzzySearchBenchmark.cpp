@@ -13,7 +13,7 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 	{
 		std::transform(file.begin(), file.end(), file.begin(), [](char c) { return gsl::narrow_cast<char>(std::tolower(c)); });
 
-		int found_count = 0;
+		size_t found_count = 0;
 		for (const std::string& str : split_by_space)
 		{
 			const auto found = file.find_last_of(str);
@@ -88,7 +88,7 @@ void BM_FindLongPattern(benchmark::State& state)
 		benchmark::DoNotOptimize(results);
 	}
 }
-//FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
+FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
 
 void BM_FuzzyShortPattern(benchmark::State& state)
 {
@@ -111,7 +111,7 @@ void BM_FuzzyShortPattern(benchmark::State& state)
 		benchmark::DoNotOptimize(results);
 	}
 }
-//FUZZY_SEARCH_BENCHMARK(BM_FuzzyShortPattern);
+FUZZY_SEARCH_BENCHMARK(BM_FuzzyShortPattern);
 
 void BM_FindShortPattern(benchmark::State& state)
 {
@@ -136,6 +136,6 @@ void BM_FindShortPattern(benchmark::State& state)
 		benchmark::DoNotOptimize(results);
 	}
 }
-//FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
+FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
 
 BENCHMARK_MAIN();
