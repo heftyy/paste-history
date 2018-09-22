@@ -79,7 +79,7 @@ inline bool IsSourceFile(const std::string& str)
 		return true;
 }
 
-int CalculateSequentialMatchScore(const std::string& str, int filename_start_index, MatchMode match_mode, const std::vector<int>& matches, int matches_length)
+int CalculateSequentialMatchScore(const std::string& str, int filename_start_index, MatchMode match_mode, const gsl::span<int>& matches)
 {
 	int out_score = 25;
 	const int str_length = gsl::narrow_cast<int>(str.length());
@@ -93,10 +93,8 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 	int first_match_in_filename = std::numeric_limits<int>::min();
 
 	// Apply ordering bonuses
-	for (int i = 0; i < matches_length; ++i)
+	for (const int curr_index : matches)
 	{
-		const int curr_index = matches.at(i);
-
 		// Check for bonuses based on neighbor character value
 		if (curr_index > 0 && (match_mode == MatchMode::E_FILENAMES || match_mode == MatchMode::E_SOURCE_FILES))
 		{
@@ -144,7 +142,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 	out_score += std::min(unmatched_letter_penalty * unmatched, 0);
 
 	// Apply sequential match bonus
-	out_score += sequential_bonus * matches_length;
+	out_score += sequential_bonus * gsl::narrow_cast<int>(matches.size());
 
 	return out_score;
 }
@@ -173,7 +171,7 @@ inline int FindSequentialMatch(const std::string& pattern, int pattern_index, co
 	return matched_chars;
 }
 
-int CalculatePatternScore(const std::string& pattern, const std::vector<PatternMatch>& in_matches, std::vector<int>& out_matches)
+int CalculatePatternScore(const std::string& pattern, const gsl::span<PatternMatch>& in_matches, std::vector<int>& out_matches)
 {
 	int out_score = 0;
 	int unmatched_characters_from_pattern = 0;
@@ -182,10 +180,10 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 
 	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
 	{
-		const PatternMatch& match = in_matches.at(pattern_index);
+		const PatternMatch& match = in_matches[pattern_index];
 		if (match.m_Score > 0)
 		{
-			out_score += in_matches.at(pattern_index).m_Score;
+			out_score += in_matches[pattern_index].m_Score;
 			out_matches.insert(out_matches.end(), match.m_Matches.begin(), match.m_Matches.end());
 
 			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
@@ -207,7 +205,7 @@ int CalculatePatternScore(const std::string& pattern, const std::vector<PatternM
 }
 
 std::vector<PatternMatch> pattern_matches(256);
-std::vector<int> matched_indexes(256);
+std::vector<int> match_indexes(256);
 
 int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches)
 {
@@ -236,19 +234,22 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 
 		for (int str_index = str_start; str_index < str_length; ++str_index)
 		{
-			const int matched_length = FindSequentialMatch(pattern, pattern_index, str, str_index);
-			if (matched_length > 0)
+			const int match_length = FindSequentialMatch(pattern, pattern_index, str, str_index);
+			if (match_length > 0)
 			{
-				std::iota(matched_indexes.begin(), matched_indexes.begin() + matched_length, str_index);
-				const int match_score = CalculateSequentialMatchScore(str, filename_start_index, match_mode, matched_indexes, matched_length);
+				// We know that the sequential match started at str_index so fill match_indexes
+				std::iota(match_indexes.begin(), match_indexes.begin() + match_length, str_index);
+
+				const auto match_span = gsl::span<int>(match_indexes.data(), match_length);
+				const int match_score = CalculateSequentialMatchScore(str, filename_start_index, match_mode, match_span);
 
 				if (match_score > pattern_matches.at(pattern_index).m_Score)
 				{
-					best_match_length = matched_length;
+					best_match_length = match_length;
 
 					PatternMatch& match = pattern_matches.at(pattern_index);
 					match.m_Score = match_score;
-					match.m_Matches.assign(matched_indexes.begin(), matched_indexes.begin() + best_match_length);
+					match.m_Matches.assign(match_indexes.begin(), match_indexes.begin() + best_match_length);
 
 					// Skip searching for matches in str that we already used in our currect best match, doing this to improve performance
 					str_index += best_match_length;
@@ -265,7 +266,7 @@ int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_
 		}
 	}
 
-	return CalculatePatternScore(pattern, pattern_matches, out_matches);
+	return CalculatePatternScore(pattern, gsl::span<PatternMatch>(pattern_matches.data(), pattern_length), out_matches);
 }
 
 std::vector<SearchResult> Search(const std::string& pattern, const std::vector<std::string>& input_strings, MatchMode match_mode)
