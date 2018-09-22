@@ -17,6 +17,8 @@ target_compile_options(paste_history PRIVATE ${COMPILE_FLAGS})
 target_compile_features(paste_history PRIVATE cxx_std_14)
 target_link_libraries(paste_history PRIVATE paste_history_lib proto)
 
+enable_guideline_checker(paste_history)
+
 IF(WIN32) # Check if we are on Windows
   if(MSVC) # Check if we are using the Visual Studio compiler
     set_target_properties(paste_history PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")

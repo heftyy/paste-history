@@ -40,9 +40,8 @@ class HistoryViewItem : public QStandardItem
 {
 public:
 	HistoryViewItem(HistoryItemData& item);
-	virtual ~HistoryViewItem();
 
-	inline HistoryItemData& GetHistoryItemData() { return m_HistoryItemData; }
+	inline HistoryItemData& GetHistoryItemData() noexcept { return m_HistoryItemData; }
 
 private:
 	HistoryItemData& m_HistoryItemData;

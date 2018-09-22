@@ -15,7 +15,7 @@ namespace FuzzySearch
 struct SearchResult
 {
 	std::string m_String;
-	int m_Score;
+	int m_Score = 0;
 	std::vector<int> m_Matches;
 };
 

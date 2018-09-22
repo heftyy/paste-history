@@ -16,3 +16,5 @@ protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTO_FILES})
 add_library(proto ${PROTO_HEADER} ${PROTO_SRC} ${PROTO_FILES})
 target_link_libraries(proto PRIVATE ${PROTOBUF_LIBRARIES})
 target_include_directories(proto PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${PROTOBUF_INCLUDE_DIRS})
+
+enable_guideline_checker(proto)

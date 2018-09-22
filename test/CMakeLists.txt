@@ -9,7 +9,10 @@ set(TEST_SRC_FILES
 )
 
 add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
-target_compile_features(${PROJECT_TEST_NAME} PUBLIC cxx_std_14)
-target_link_libraries(${PROJECT_TEST_NAME} fuzzy_search_lib GTest::GTest GTest::Main)
+target_compile_options(${PROJECT_TEST_NAME} PRIVATE ${COMPILE_FLAGS})
+target_compile_features(${PROJECT_TEST_NAME} PRIVATE cxx_std_14)
+target_link_libraries(${PROJECT_TEST_NAME} PRIVATE fuzzy_search_lib GTest::GTest GTest::Main)
+
+enable_guideline_checker(${PROJECT_TEST_NAME})
 
 add_test(NAME all_tests COMMAND $<TARGET_FILE:${PROJECT_TEST_NAME}>)

@@ -26,7 +26,7 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 
 	setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-	QClipboard* clipboard = QApplication::clipboard();
+	const QClipboard* clipboard = QApplication::clipboard();
 	connect(clipboard, &QClipboard::dataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
 	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);
 }
@@ -62,13 +62,16 @@ bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
 
 void PasteHistoryWindow::OnClipboardDataChanged()
 {
-	QClipboard* clipboard = QApplication::clipboard();
-	QString text = clipboard->text();
+	const QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		QString text = clipboard->text();
 
-	std::string text_to_hash = text.toStdString();
-	std::hash<std::string> hasher;
-	size_t text_hash = hasher(text_to_hash);
-	size_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		std::string text_to_hash = text.toStdString();
+		std::hash<std::string> hasher;
+		const size_t text_hash = hasher(text_to_hash);
+		const size_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-	m_HistoryView->AddToHistory(text, text_hash, timestamp);
+		m_HistoryView->AddToHistory(text, text_hash, timestamp);
+	}
 }

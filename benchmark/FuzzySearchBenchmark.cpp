@@ -1,6 +1,7 @@
 #include <FuzzySearch.h>
 #include <benchmark/benchmark.h>
 
+#include <gsl/gsl>
 #include <cctype>
 
 std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
@@ -10,12 +11,12 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 
 	for (std::string file : files)
 	{
-		std::transform(file.begin(), file.end(), file.begin(), [](char c) { return static_cast<char>(std::tolower(c)); });
+		std::transform(file.begin(), file.end(), file.begin(), [](char c) { return gsl::narrow_cast<char>(std::tolower(c)); });
 
 		int found_count = 0;
 		for (const std::string& str : split_by_space)
 		{
-			auto found = file.find_last_of(str);
+			const auto found = file.find_last_of(str);
 			if (found != std::string::npos)
 			{
 				++found_count;
@@ -41,7 +42,7 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 
 #define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK( BENCHMARK_NAME )->Repetitions(5)
 
-static void BM_FuzzyLongPattern(benchmark::State& state)
+void BM_FuzzyLongPattern(benchmark::State& state)
 {
 	std::vector<std::string> original_files = {
 	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
@@ -56,7 +57,7 @@ static void BM_FuzzyLongPattern(benchmark::State& state)
 	    "e:/libs/otherlib/main/source/CMakeLists.txt",
 	};
 
-	for (auto _ : state)
+	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", original_files, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
@@ -64,7 +65,7 @@ static void BM_FuzzyLongPattern(benchmark::State& state)
 }
 FUZZY_SEARCH_BENCHMARK(BM_FuzzyLongPattern);
 
-static void BM_FindLongPattern(benchmark::State& state)
+void BM_FindLongPattern(benchmark::State& state)
 {
 	std::vector<std::string> original_files = {
 	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
@@ -81,15 +82,15 @@ static void BM_FindLongPattern(benchmark::State& state)
 
 	std::vector<std::string> split_by_space = {"hierarchy", "node", "base"};
 
-	for (auto _ : state)
+	for (const auto _ : state)
 	{
 		std::vector<std::string> results = NaiveSearch(split_by_space, original_files);
 		benchmark::DoNotOptimize(results);
 	}
 }
-FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
+//FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
 
-static void BM_FuzzyShortPattern(benchmark::State& state)
+void BM_FuzzyShortPattern(benchmark::State& state)
 {
 	std::vector<std::string> original_files = {
 	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
@@ -104,15 +105,15 @@ static void BM_FuzzyShortPattern(benchmark::State& state)
 	    "e:/libs/otherlib/main/source/CMakeLists.txt",
 	};
 
-	for (auto _ : state)
+	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("BASE", original_files, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }
-FUZZY_SEARCH_BENCHMARK(BM_FuzzyShortPattern);
+//FUZZY_SEARCH_BENCHMARK(BM_FuzzyShortPattern);
 
-static void BM_FindShortPattern(benchmark::State& state)
+void BM_FindShortPattern(benchmark::State& state)
 {
 	std::vector<std::string> original_files = {
 	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
@@ -129,12 +130,12 @@ static void BM_FindShortPattern(benchmark::State& state)
 
 	std::vector<std::string> split_by_space = {"BASE"};
 
-	for (auto _ : state)
+	for (const auto _ : state)
 	{
 		std::vector<std::string> results = NaiveSearch(split_by_space, original_files);
 		benchmark::DoNotOptimize(results);
 	}
 }
-FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
+//FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
 
 BENCHMARK_MAIN();

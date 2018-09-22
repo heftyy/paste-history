@@ -13,10 +13,22 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Force to always compile with W4 and treat warnings as errors
 if(MSVC)
-    set(COMPILE_FLAGS /W4 /WX)
+    # You need to set the env variable CAExcludePath to point to all 3rd party includes for this to work
+    # make sure that paths in CAExcludePath are CASE CORRECT!
+    # /w4193 is broken in 15.8 combined with experimental and including the same header with pragma once multiple times
+    set(COMPILE_FLAGS /W4 /WX /experimental:external /external:W0 /external:env:CAExcludePath /wd4193)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(COMPILE_FLAGS -Wall -Werror -Wno-long-long -pedantic)
 endif()
+
+function(enable_guideline_checker target)
+    if(MSVC)
+        set_target_properties(${target} PROPERTIES
+            VS_GLOBAL_EnableCppCoreCheck true
+            VS_GLOBAL_CodeAnalysisRuleSet CppCoreCheckRules.ruleset
+            VS_GLOBAL_RunCodeAnalysis true)
+    endif()
+endfunction()
 
 set(EXT_PROJECTS_DIR ${PROJECT_SOURCE_DIR}/ext)
 
