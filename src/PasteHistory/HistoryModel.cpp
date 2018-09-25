@@ -75,7 +75,7 @@ bool HistoryModel::filterAcceptsRow(int source_row, const QModelIndex& source_pa
 
 	HistoryItemData& item_data = history_view_item->GetHistoryItemData();
 
-	item_data.m_MatchScore = FuzzySearch::FuzzyMatch(m_FilterPattern, item_data.m_Text, 0, FuzzySearch::MatchMode::E_STRINGS, item_data.m_Matches);
+	item_data.m_MatchScore = FuzzySearch::FuzzyMatch(m_FilterPattern, item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS, item_data.m_Matches);
 
 	return item_data.m_MatchScore > 0;
 }

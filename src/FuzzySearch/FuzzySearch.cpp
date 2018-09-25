@@ -206,7 +206,7 @@ int CalculatePatternScore(std::string_view pattern, const gsl::span<PatternMatch
 std::vector<PatternMatch> pattern_matches(256);
 std::vector<int> match_indexes(256);
 
-int FuzzyMatch(std::string_view pattern, std::string_view str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches)
+int FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode, std::vector<int>& out_matches)
 {
 	out_matches.reserve(pattern.length());
 
@@ -214,6 +214,12 @@ int FuzzyMatch(std::string_view pattern, std::string_view str, int filename_star
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
 	int str_start = 0;
+
+	int last_path_separator_index = 0;
+	if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)
+	{
+		last_path_separator_index = gsl::narrow_cast<int>(str.find_last_of("\\/"));
+	}
 
 	// Loop through pattern and str looking for a match
 	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
@@ -240,7 +246,7 @@ int FuzzyMatch(std::string_view pattern, std::string_view str, int filename_star
 				std::iota(match_indexes.begin(), match_indexes.begin() + match_length, str_index);
 
 				const auto match_span = gsl::span<int>(match_indexes.data(), match_length);
-				const int match_score = CalculateSequentialMatchScore(str, filename_start_index, match_mode, match_span);
+				const int match_score = CalculateSequentialMatchScore(str, last_path_separator_index, match_mode, match_span);
 
 				if (match_score > pattern_matches.at(pattern_index).m_Score)
 				{
@@ -280,15 +286,9 @@ std::vector<SearchResult> Search(std::string_view pattern, const std::vector<std
 
 	for (const std::string& input_string : input_strings)
 	{
-		int last_path_separator_index = 0;
-		if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)
-		{
-			last_path_separator_index = gsl::narrow_cast<int>(input_string.find_last_of("\\/"));
-		}
-
 		std::vector<int> matches;
 		matches.reserve(pattern.length());
-		const int score = FuzzyMatch(pattern, input_string, last_path_separator_index, match_mode, matches);
+		const int score = FuzzyMatch(pattern, input_string, match_mode, matches);
 
 		if (score > 0)
 		{
