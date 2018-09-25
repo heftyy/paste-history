@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <string>
 #include <vector>
 
@@ -26,8 +27,8 @@ enum class MatchMode
 	E_SOURCE_FILES
 };
 
-int FuzzyMatch(const std::string& pattern, const std::string& str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches);
+int FuzzyMatch(std::string_view pattern, std::string_view str, int filename_start_index, MatchMode match_mode, std::vector<int>& out_matches);
 
-std::vector<SearchResult> Search(const std::string& expression, const std::vector<std::string>& input_strings, MatchMode match_mode);
+std::vector<SearchResult> Search(std::string_view expression, const std::vector<std::string>& input_strings, MatchMode match_mode);
 
 } // namespace FuzzySearch

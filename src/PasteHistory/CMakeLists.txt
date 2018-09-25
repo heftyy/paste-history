@@ -24,7 +24,7 @@ target_compile_options(paste_history_lib PRIVATE ${COMPILE_FLAGS})
 if(MSVC)
 	target_compile_options(paste_history_lib PRIVATE /wd4127)
 endif()
-target_compile_features(paste_history_lib PUBLIC cxx_std_14)
+target_compile_features(paste_history_lib PUBLIC cxx_std_17)
 target_link_libraries(paste_history_lib PRIVATE fuzzy_search_lib PUBLIC ${QT_QTMAIN_LIBRARY} Qt5::Core Qt5::Widgets)
 target_include_directories(paste_history_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
