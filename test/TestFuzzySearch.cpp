@@ -17,6 +17,7 @@ TEST(FuzzySearchTest, SourceFiles)
 	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
 	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
 	    "e:/libs/otherlib/main/source/CMakeLists.txt",
+	    "e:/libs/otherlib/main/source/no_extension",
 	};
 
 	{
@@ -60,6 +61,7 @@ TEST(FuzzySearchTest, Filenames)
 	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
 	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
 	    "e:/libs/otherlib/main/source/CMakeLists.txt",
+	    "e:/libs/otherlib/main/source/no_extension",
 	};
 
 	{

@@ -1,6 +1,7 @@
 #include "FuzzySearch.h"
 
 #include <algorithm>
+#include <set>
 #include <gsl/gsl>
 
 // #define USE_STD_LOWER
@@ -64,17 +65,15 @@ constexpr int ToUpper(int c) noexcept
 #endif
 }
 
-std::vector<std::string> source_extensions = {".cpp", ".cs", ".c", ".java", ".py"};
+std::set<std::string> source_extensions = {".cpp", ".cs", ".c", ".java", ".py"};
 
 bool IsSourceFile(std::string_view str) noexcept
 {
 	const size_t ext_len = str.rfind(".");
-	for (const std::string& extension : source_extensions)
+	if (ext_len != std::string::npos)
 	{
-		if (str.compare(ext_len, extension.length(), extension) == 0)
-		{
-			return true;
-		}
+		std::string ext(str, ext_len, str.length() - ext_len);
+		return source_extensions.find(ext) != source_extensions.end();
 	}
 	return false;
 }
