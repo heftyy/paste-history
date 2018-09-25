@@ -34,7 +34,7 @@ constexpr bool IsLower(char c) noexcept
 #if defined(USE_STD_LOWER)
 	return std::islower(c);
 #else
-	return 97 >= c && c <= 122;
+	return c >= 97 && c <= 122;
 #endif
 }
 
@@ -43,7 +43,7 @@ constexpr bool IsUpper(char c) noexcept
 #if defined(USE_STD_LOWER)
 	return std::isupper(c);
 #else
-	return 65 >= c && c <= 90;
+	return c >= 65 && c <= 90;
 #endif
 }
 
@@ -81,7 +81,7 @@ inline bool IsSourceFile(const std::string& str)
 
 int CalculateSequentialMatchScore(const std::string& str, int filename_start_index, MatchMode match_mode, const gsl::span<int>& matches)
 {
-	int out_score = 25;
+	int out_score = 5;
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
 	if (match_mode == MatchMode::E_SOURCE_FILES && IsSourceFile(str))
@@ -90,7 +90,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 	}
 
 	int matches_in_filename = 0;
-	int first_match_in_filename = std::numeric_limits<int>::min();
+	int first_match_in_filename = -1;
 
 	// Apply ordering bonuses
 	for (const int curr_index : matches)
@@ -117,7 +117,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 		if (curr_index >= filename_start_index)
 		{
 			// Save the first match in the filename
-			if (first_match_in_filename == std::numeric_limits<int>::min())
+			if (first_match_in_filename == -1)
 			{
 				first_match_in_filename = curr_index;
 			}
@@ -134,7 +134,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 	}
 
 	// Apply leading letter penalty
-	const int calculated_leading_letter_penalty = std::min(leading_letter_penalty * (first_match_in_filename - filename_start_index), 0);
+	const int calculated_leading_letter_penalty = std::min(leading_letter_penalty * (std::abs(first_match_in_filename - filename_start_index)), 0);
 	out_score += std::max(calculated_leading_letter_penalty, max_leading_letter_penalty);
 
 	// Apply unmatched penalty
@@ -142,7 +142,7 @@ int CalculateSequentialMatchScore(const std::string& str, int filename_start_ind
 	out_score += std::min(unmatched_letter_penalty * unmatched, 0);
 
 	// Apply sequential match bonus
-	out_score += sequential_bonus * gsl::narrow_cast<int>(matches.size());
+	out_score += sequential_bonus * (gsl::narrow_cast<int>(matches.size()) - 1);
 
 	return out_score;
 }
