@@ -20,7 +20,7 @@ before_install:
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
   - ./vcpkg install protobuf gtest benchmark ms-gsl
-  - export VCPKG_ROOT=$(pwd)/scripts/buildsystems/vcpkg.cmake
+  - export VCPKG_ROOT=$(pwd)
   - cd ..
 before_script:
   - mkdir build
