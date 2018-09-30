@@ -9,13 +9,14 @@ set(CMAKE_AUTORCC ON)
 
 add_subdirectory(Config)
 add_subdirectory(FuzzySearch)
-add_subdirectory(PasteHistory)
-add_subdirectory(ProtobufTypes)
+add_subdirectory(SearchableHistory)
+add_subdirectory(PasteHistoryWindow)
+add_subdirectory(HistoryTypes)
 
 add_executable(paste_history WIN32 ${SOURCE_FILES})
 target_compile_options(paste_history PRIVATE ${COMPILE_FLAGS})
 target_compile_features(paste_history PRIVATE cxx_std_17)
-target_link_libraries(paste_history PRIVATE paste_history_lib proto)
+target_link_libraries(paste_history PRIVATE paste_history_window_lib)
 
 enable_guideline_checker(paste_history)
 

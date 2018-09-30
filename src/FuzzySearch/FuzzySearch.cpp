@@ -1,8 +1,8 @@
 #include "FuzzySearch.h"
 
 #include <algorithm>
-#include <set>
 #include <gsl/gsl>
+#include <set>
 
 // #define USE_STD_LOWER
 #if defined(USE_STD_LOWER)

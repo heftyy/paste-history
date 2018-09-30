@@ -60,12 +60,12 @@ add_subdirectory(doc)
 if(WIN32)
     add_custom_target(Qt5CopyBinaries ALL
         # todo: check if debug and release folder exist
-        # debug version
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugins/platforms
 
+        # debug version
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Cored.dll                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug
         COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Testd.dll                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug

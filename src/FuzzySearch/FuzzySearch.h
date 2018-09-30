@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <string_view>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace FuzzySearch

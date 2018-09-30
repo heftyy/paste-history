@@ -4,7 +4,7 @@
 
 #include <Config/PasteHistoryConfig.h>
 
-#include <PasteHistory/PasteHistoryWindow.h>
+#include <PasteHistoryWindow/PasteHistoryWindow.h>
 
 int main(int argc, char** argv)
 {
