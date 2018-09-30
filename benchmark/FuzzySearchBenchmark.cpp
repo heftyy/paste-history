@@ -1,8 +1,8 @@
 #include <FuzzySearch.h>
 #include <benchmark/benchmark.h>
 
-#include <gsl/gsl>
 #include <cctype>
+#include <gsl/gsl>
 
 std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
 {
@@ -40,7 +40,12 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 	return results;
 }
 
-#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK( BENCHMARK_NAME )->Repetitions(5)
+static const std::string& GetStringFunc(const std::string& string)
+{
+	return string;
+}
+
+#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK(BENCHMARK_NAME)->Repetitions(5)
 
 void BM_FuzzyLongPattern(benchmark::State& state)
 {
@@ -59,7 +64,8 @@ void BM_FuzzyLongPattern(benchmark::State& state)
 
 	for (const auto _ : state)
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", original_files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("hierarchy node base", original_files.begin(), original_files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }
@@ -107,7 +113,8 @@ void BM_FuzzyShortPattern(benchmark::State& state)
 
 	for (const auto _ : state)
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("BASE", original_files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("BASE", original_files.begin(), original_files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }

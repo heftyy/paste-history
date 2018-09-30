@@ -4,6 +4,11 @@
 
 #include <FuzzySearch.h>
 
+static const std::string& GetStringFunc(const std::string& string)
+{
+	return string;
+}
+
 TEST(FuzzySearchTest, SourceFiles)
 {
 	std::vector<std::string> files = {
@@ -21,7 +26,8 @@ TEST(FuzzySearchTest, SourceFiles)
 	};
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhn", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("bhn", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
@@ -29,13 +35,15 @@ TEST(FuzzySearchTest, SourceFiles)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhnl", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("bhnl", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[1].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("hierarchy node base", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
@@ -43,7 +51,8 @@ TEST(FuzzySearchTest, SourceFiles)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists node", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("cmakelists node", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[0].m_String);
 	}
 }
@@ -65,7 +74,8 @@ TEST(FuzzySearchTest, Filenames)
 	};
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhn", files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("bhn", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[2].m_String);
@@ -73,13 +83,15 @@ TEST(FuzzySearchTest, Filenames)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("node loader", files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("node loader", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[1].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", files, FuzzySearch::MatchMode::E_FILENAMES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("hierarchy node base", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[2].m_String);
@@ -87,7 +99,8 @@ TEST(FuzzySearchTest, Filenames)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("cmakelists", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/otherlib/main/source/CMakeLists.txt", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[1].m_String);
 	}
@@ -105,20 +118,23 @@ TEST(FuzzySearchTest, Strings)
 	};
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("git", files, FuzzySearch::MatchMode::E_STRINGS);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("git", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git init", results[0].m_String);
 		ASSERT_EQ("git status", results[1].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("add", files, FuzzySearch::MatchMode::E_STRINGS);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("add", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git add my_new_file.txt", results[0].m_String);
 		ASSERT_EQ("git commit -m \"Add three files\"", results[1].m_String);
 		ASSERT_EQ("git remote add origin https://github.com/heftyy/fuzzy-search.git", results[2].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("reset", files, FuzzySearch::MatchMode::E_STRINGS);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("reset", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_STRINGS);
 		ASSERT_EQ("git reset --soft HEAD^", results[0].m_String);
 	}
 }

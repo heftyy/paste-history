@@ -4,6 +4,11 @@
 
 #include <FuzzySearch.h>
 
+static const std::string& GetStringFunc(const std::string& string)
+{
+	return string;
+}
+
 TEST(TestSearchableHistory, Add)
 {
 	std::vector<std::string> files = {
@@ -21,7 +26,8 @@ TEST(TestSearchableHistory, Add)
 	};
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhn", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("bhn", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
@@ -29,13 +35,15 @@ TEST(TestSearchableHistory, Add)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("bhnl", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("bhnl", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[1].m_String);
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("hierarchy node base", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("hierarchy node base", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
@@ -43,7 +51,8 @@ TEST(TestSearchableHistory, Add)
 	}
 
 	{
-		std::vector<FuzzySearch::SearchResult> results = FuzzySearch::Search("cmakelists node", files, FuzzySearch::MatchMode::E_SOURCE_FILES);
+		std::vector<FuzzySearch::SearchResult> results =
+		    FuzzySearch::Search("cmakelists node", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[0].m_String);
 	}
 }

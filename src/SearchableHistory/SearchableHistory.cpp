@@ -17,42 +17,15 @@ const CopiedText& SearchableHistory::GetText(int index) const
 	return m_CopyHistory.history()[index];
 }
 
+static const std::string& GetStringFunc(const CopiedText& copied_text)
+{
+	return copied_text.text();
+}
+
 std::vector<FuzzySearch::SearchResult> SearchableHistory::Search(std::string_view pattern)
 {
-	if (pattern.empty())
-	{
-		return {};
-	}
-
-	std::vector<FuzzySearch::SearchResult> result;
-	result.reserve(m_CopyHistory.history_size());
-
-	for (const CopiedText& copied_text : m_CopyHistory.history())
-	{
-		std::vector<int> matches;
-		std::string input_string = copied_text.text();
-		matches.reserve(pattern.length());
-		const int score = FuzzySearch::FuzzyMatch(pattern, input_string, FuzzySearch::MatchMode::E_FILENAMES, matches);
-
-		if (score > 0)
-		{
-			result.push_back({input_string, score, matches});
-		}
-	}
-
-	std::sort(result.begin(), result.end(), [](const FuzzySearch::SearchResult& lhs, const FuzzySearch::SearchResult& rhs) noexcept {
-		if (lhs.m_Score > rhs.m_Score)
-		{
-			return true;
-		}
-		else if (lhs.m_Score == rhs.m_Score)
-		{
-			return lhs.m_String.size() < rhs.m_String.size();
-		}
-		return false;
-	});
-
-	return result;
+	const auto& history = m_CopyHistory.history();
+	return FuzzySearch::Search(pattern, history.begin(), history.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 }
 
 bool SearchableHistory::SaveToFile(std::string_view file_path)
