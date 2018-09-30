@@ -1,6 +1,5 @@
 #include "FuzzySearch.h"
 
-#include <algorithm>
 #include <gsl/gsl>
 #include <set>
 
@@ -89,10 +88,10 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
 	int matches_in_filename = 0;
-	size_t first_match_in_filename = max_pattern_length + 1;
+	int first_match_in_filename = -1;
 
 	// Apply ordering bonuses
-	for (const size_t curr_index : matches)
+	for (const int curr_index : matches)
 	{
 		// Check for bonuses based on neighbor character value
 		if (curr_index > 0 && (match_mode == MatchMode::E_FILENAMES || match_mode == MatchMode::E_SOURCE_FILES))
@@ -138,7 +137,7 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 	}
 
 	// Apply leading letter penalty
-	const int calculated_leading_letter_penalty = std::min(leading_letter_penalty * gsl::narrow_cast<int>(first_match_in_filename - filename_start_index), 0);
+	const int calculated_leading_letter_penalty = std::min(leading_letter_penalty * (first_match_in_filename - filename_start_index), 0);
 	out_score += std::max(calculated_leading_letter_penalty, max_leading_letter_penalty);
 
 	// Apply unmatched penalty

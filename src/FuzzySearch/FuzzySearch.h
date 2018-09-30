@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -46,7 +47,7 @@ std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Itera
 	std::vector<SearchResult> search_results;
 	search_results.reserve(std::distance(begin, end));
 
-	std::for_each(begin, end, [pattern, &get_string_func, match_mode, &search_results](const auto& element) 
+	std::for_each(begin, end, [pattern, &get_string_func, match_mode, &search_results](const auto& element)
 	{
 		std::vector<int> matches;
 		matches.reserve(pattern.length());
