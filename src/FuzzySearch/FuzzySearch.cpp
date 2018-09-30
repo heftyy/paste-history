@@ -150,7 +150,7 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 	return out_score;
 }
 
-inline int FindSequentialMatch(std::string_view pattern, size_t pattern_index, std::string_view str, size_t str_index) noexcept
+inline int FindSequentialMatch(std::string_view pattern, int pattern_index, std::string_view str, int str_index) noexcept
 {
 	// The pattern characters usually mismatch str characters so this early out just helps optizmier/cpu
 	if (ToLower(pattern.at(pattern_index)) != ToLower(str.at(str_index)))
