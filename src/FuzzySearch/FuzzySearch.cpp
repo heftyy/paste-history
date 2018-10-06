@@ -11,12 +11,6 @@
 namespace FuzzySearch
 {
 
-struct PatternMatch
-{
-	int m_Score = 0;
-	std::vector<int> m_Matches;
-};
-
 constexpr int sequential_bonus = 20;         // bonus for adjacent matches
 constexpr int separator_bonus = 20;          // bonus if match occurs after a separator
 constexpr int camel_bonus = 25;              // bonus if match is uppercase and prev is lower
@@ -26,7 +20,7 @@ constexpr int leading_letter_penalty = -2;   // penalty applied for every letter
 constexpr int unmatched_letter_penalty = -1; // penalty for every letter that doesn't matter
 
 constexpr int max_leading_letter_penalty = -10;
-constexpr int max_unmatched_characters_from_pattern = 1;
+constexpr int max_unmatched_characters_from_pattern = 3;
 
 constexpr bool IsLower(char c) noexcept
 {
@@ -174,9 +168,10 @@ inline int FindSequentialMatch(std::string_view pattern, int pattern_index, std:
 	return matched_chars;
 }
 
-int CalculatePatternScore(std::string_view pattern, const gsl::span<PatternMatch>& in_matches, std::vector<int>& out_matches)
+PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<PatternMatch>& in_matches)
 {
-	int out_score = 0;
+	PatternMatch out_match;
+	out_match.m_Matches.reserve(pattern.length());
 	int unmatched_characters_from_pattern = 0;
 
 	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
@@ -186,8 +181,8 @@ int CalculatePatternScore(std::string_view pattern, const gsl::span<PatternMatch
 		const PatternMatch& match = in_matches[pattern_index];
 		if (match.m_Score > 0)
 		{
-			out_score += in_matches[pattern_index].m_Score;
-			out_matches.insert(out_matches.end(), match.m_Matches.begin(), match.m_Matches.end());
+			out_match.m_Score += match.m_Score;
+			out_match.m_Matches.insert(out_match.m_Matches.end(), match.m_Matches.begin(), match.m_Matches.end());
 
 			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
 			pattern_index += gsl::narrow_cast<int>(match.m_Matches.size() - 1);
@@ -201,10 +196,10 @@ int CalculatePatternScore(std::string_view pattern, const gsl::span<PatternMatch
 	// Allow some unmatched characters (typos etc...)
 	if (unmatched_characters_from_pattern >= max_unmatched_characters_from_pattern)
 	{
-		return 0;
+		return {0};
 	}
 
-	return out_score;
+	return out_match;
 }
 
 std::vector<PatternMatch>& GetPatternMatches()
@@ -219,10 +214,8 @@ std::vector<int>& GetMatchIndexes()
 	return match_indexes;
 }
 
-int FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode, std::vector<int>& out_matches)
+PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode)
 {
-	out_matches.reserve(pattern.length());
-
 	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
@@ -287,7 +280,7 @@ int FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_m
 		}
 	}
 
-	return CalculatePatternScore(pattern, gsl::span<PatternMatch>(pattern_matches.data(), pattern_length), out_matches);
+	return CalculatePatternScore(pattern, gsl::span<PatternMatch>(pattern_matches.data(), pattern_length));
 }
 
 } // namespace FuzzySearch

@@ -2,57 +2,33 @@
 
 #include <gtest/gtest.h>
 
-#include <FuzzySearch.h>
+#include <SearchableHistory.h>
 
-static const std::string& GetStringFunc(const std::string& string)
+static size_t GetTimestamp()
 {
-	return string;
+	auto duration = std::chrono::system_clock::now().time_since_epoch();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
 
 TEST(TestSearchableHistory, Add)
 {
-	std::vector<std::string> files = {
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/no_extension",
-	};
+	SearchableHistory searchable_history;
 
+	for (int i = 0; i < 5; ++i)
 	{
-		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("bhn", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[3].m_String);
+		CopiedText ct;
+		ct.set_text("my test " + std::to_string(i));
+		ct.set_expire_timestamp(GetTimestamp());
+		searchable_history.AddText(ct);
 	}
 
-	{
-		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("bhnl", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[0].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[1].m_String);
-	}
+	gsl::span<CopiedText> copied_history = searchable_history.GetAll();
 
-	{
-		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("hierarchy node base", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp", results[0].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h", results[1].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp", results[2].m_String);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h", results[3].m_String);
-	}
+	ASSERT_EQ(copied_history.size(), 5);
 
-	{
-		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("cmakelists node", files.begin(), files.end(), GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
-		ASSERT_EQ("e:/libs/nodehierarchy/main/source/CMakeLists.txt", results[0].m_String);
-	}
+	//ASSERT_EQ(copied_history[0].text(), "my test 0");
+	//ASSERT_EQ(copied_history[1].text(), "my test 1");
+	//ASSERT_EQ(copied_history[2].text(), "my test 2");
+	//ASSERT_EQ(copied_history[3].text(), "my test 3");
+	//ASSERT_EQ(copied_history[4].text(), "my test 4");
 }

@@ -29,7 +29,8 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 function(enable_guideline_checker target)
-    if(MSVC)
+    if(false)
+    #if(MSVC)
         set_target_properties(${target} PROPERTIES
             VS_GLOBAL_EnableCppCoreCheck true
             VS_GLOBAL_CodeAnalysisRuleSet CppCoreCheckRules.ruleset

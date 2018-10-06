@@ -7,11 +7,6 @@ set(FUZZY_SEARCH_SOURCE_FILES
         FuzzySearch.h
         )
 
-find_path(GSL_INCLUDE_DIR gsl/gsl)
-if(GSL_INCLUDE_DIR STREQUAL "GSL_INCLUDE_DIR-NOTFOUND")
-  message(FATAL_ERROR "Could not find Guidelines Support Library.")
-endif()
-
 add_library(fuzzy_search_lib ${FUZZY_SEARCH_SOURCE_FILES})
 target_compile_options(fuzzy_search_lib PRIVATE ${COMPILE_FLAGS})
 target_compile_features(fuzzy_search_lib PUBLIC cxx_std_17)

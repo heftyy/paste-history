@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QClipboard>
 
 class PasteHistoryWindow : public QDialog
 {
@@ -15,6 +16,7 @@ protected:
 private:
 	class HistoryView* m_HistoryView;
 	class QLineEdit* m_LineEdit;
+	class Clipboard* m_Clipboard;
 
-	void OnClipboardDataChanged();
+	void OnClipboardDataChanged(const std::string& text);
 };

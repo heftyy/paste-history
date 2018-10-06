@@ -9,16 +9,22 @@
 #include <algorithm>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 namespace FuzzySearch
 {
 
-struct SearchResult
+struct PatternMatch
 {
-	std::string m_String;
 	int m_Score = 0;
 	std::vector<int> m_Matches;
+};
+
+struct SearchResult
+{
+	std::string_view m_String;
+	PatternMatch m_PatternMatch;
 };
 
 enum class MatchMode
@@ -30,11 +36,15 @@ enum class MatchMode
 
 constexpr size_t max_pattern_length = 256;
 
-int FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode, std::vector<int>& out_matches);
+PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode);
 
 template <typename Iterator, typename Func>
 std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Iterator end, Func&& get_string_func, MatchMode match_mode)
 {
+	static_assert(std::is_function<std::remove_pointer<Func>::type>::value, "get_string_func needs to be a pointer to function");
+	static_assert(std::is_same<std::result_of<Func(typename std::iterator_traits<Iterator>::value_type)>::type, std::string_view>::value,
+	              "get_string_func must return std::string_view");
+
 	if (pattern.empty())
 	{
 		return {};
@@ -47,27 +57,25 @@ std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Itera
 	std::vector<SearchResult> search_results;
 	search_results.reserve(std::distance(begin, end));
 
-	std::for_each(begin, end, [pattern, &get_string_func, match_mode, &search_results](const auto& element)
+	std::for_each(begin, end, [pattern, &get_string_func, match_mode, &search_results](const auto& element) 
 	{
-		std::vector<int> matches;
-		matches.reserve(pattern.length());
+		SearchResult search_result;
+		search_result.m_String = get_string_func(element);
+		search_result.m_PatternMatch = FuzzyMatch(pattern, search_result.m_String, match_mode);
 
-		const std::string& input_string = get_string_func(element);
-		const int score = FuzzyMatch(pattern, input_string, match_mode, matches);
-
-		if (score > 0)
+		if (search_result.m_PatternMatch.m_Score > 0)
 		{
-			search_results.push_back({input_string, score, matches});
+			search_results.push_back(std::move(search_result));
 		}
 	});
 
 	std::sort(search_results.begin(), search_results.end(), [](const SearchResult& lhs, const SearchResult& rhs) noexcept 
 	{
-		if (lhs.m_Score > rhs.m_Score)
+		if (lhs.m_PatternMatch.m_Score > rhs.m_PatternMatch.m_Score)
 		{
 			return true;
 		}
-		else if (lhs.m_Score == rhs.m_Score)
+		else if (lhs.m_PatternMatch.m_Score == rhs.m_PatternMatch.m_Score)
 		{
 			return lhs.m_String.size() < rhs.m_String.size();
 		}

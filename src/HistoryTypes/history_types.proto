@@ -2,11 +2,11 @@ syntax = "proto3";
 
 message CopiedText
 {
-  string text = 1;
-  int64 expire_timestamp = 2;
+	string text = 1;
+	int64 expire_timestamp = 2;
 }
 
 message CopyHistory
 {
-  repeated CopiedText history = 1;
+	repeated CopiedText history = 1;
 }

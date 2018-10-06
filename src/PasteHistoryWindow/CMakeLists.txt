@@ -11,12 +11,17 @@ set(PASTE_HISTORY_SOURCE_FILES
 		${UI_HEADERS}
 		PasteHistoryWindow.cpp
 		PasteHistoryWindow.h
+		HistoryItem.cpp
+		HistoryItem.h
 		HistoryView.cpp
 		HistoryView.h
-		HistoryModel.cpp
-		HistoryModel.h
+		HistoryViewConstants.h
+		HistoryItemModel.cpp
+		HistoryItemModel.h
 		FuzzySearchBox.cpp
 		FuzzySearchBox.h
+		Clipboard.cpp
+		Clipboard.h
 )
 
 add_library(paste_history_window_lib ${PASTE_HISTORY_SOURCE_FILES})

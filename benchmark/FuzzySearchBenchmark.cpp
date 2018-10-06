@@ -1,8 +1,9 @@
-#include <FuzzySearch.h>
-#include <benchmark/benchmark.h>
-
 #include <cctype>
 #include <gsl/gsl>
+
+#include <benchmark/benchmark.h>
+
+#include <FuzzySearch.h>
 
 std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
 {
@@ -40,7 +41,7 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 	return results;
 }
 
-static const std::string& GetStringFunc(const std::string& string)
+static std::string_view GetStringFunc(std::string_view string)
 {
 	return string;
 }
@@ -65,7 +66,7 @@ void BM_FuzzyLongPattern(benchmark::State& state)
 	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("hierarchy node base", original_files.begin(), original_files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
+		    FuzzySearch::Search("hierarchy node base", original_files.begin(), original_files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }
@@ -114,7 +115,7 @@ void BM_FuzzyShortPattern(benchmark::State& state)
 	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("BASE", original_files.begin(), original_files.end(), GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
+		    FuzzySearch::Search("BASE", original_files.begin(), original_files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
 		benchmark::DoNotOptimize(results);
 	}
 }

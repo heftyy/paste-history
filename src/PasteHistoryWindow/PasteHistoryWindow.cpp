@@ -1,14 +1,15 @@
 #include "PasteHistoryWindow.h"
-#include "HistoryView.h"
+
+#include <chrono>
 
 #include <QApplication>
-#include <QClipboard>
 #include <QKeyEvent>
 #include <QLayout>
 #include <QLineEdit>
-#include <QListWidget>
+#include <QDebug>
 
-#include <chrono>
+#include "HistoryView.h"
+#include "Clipboard.h"
 
 PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
     : QDialog(parent)
@@ -16,18 +17,18 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	QLayout* main_layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
 	m_HistoryView = new HistoryView(this);
-	m_HistoryView->setFocusPolicy(Qt::NoFocus);
 	main_layout->addWidget(m_HistoryView);
 
 	m_LineEdit = new QLineEdit(this);
-	m_LineEdit->setFocusPolicy(Qt::StrongFocus);
 	m_LineEdit->installEventFilter(this);
 	main_layout->addWidget(m_LineEdit);
 
+	m_HistoryView->setFocusProxy(m_LineEdit);
+
 	setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-	const QClipboard* clipboard = QApplication::clipboard();
-	connect(clipboard, &QClipboard::dataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
+	m_Clipboard = new Clipboard(this);
+	connect(m_Clipboard, &Clipboard::DataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
 	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);
 }
 
@@ -35,8 +36,8 @@ void PasteHistoryWindow::Start()
 {
 	show();
 
-	m_HistoryView->AddToHistory("blum", 1, 1);
-	m_HistoryView->AddToHistory("blam", 2, 2);
+	m_HistoryView->AddToHistory("blum", 1);
+	m_HistoryView->AddToHistory("blam", 2);
 }
 
 void PasteHistoryWindow::showEvent(QShowEvent* event)
@@ -48,11 +49,11 @@ void PasteHistoryWindow::showEvent(QShowEvent* event)
 bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
 {
 	Q_UNUSED(obj);
-	if (QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event))
+	if (const QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event))
 	{
 		if (m_HistoryView->IsShortutKey(key_event))
 		{
-			// qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
+			qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
 			return true;
 		}
 	}
@@ -60,18 +61,10 @@ bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
 	return false;
 }
 
-void PasteHistoryWindow::OnClipboardDataChanged()
+void PasteHistoryWindow::OnClipboardDataChanged(const std::string& text)
 {
-	const QClipboard* clipboard = QApplication::clipboard();
-	if (clipboard)
-	{
-		QString text = clipboard->text();
+	const auto duration_since_epoch = std::chrono::system_clock::now().time_since_epoch();
+	const size_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(duration_since_epoch).count();
 
-		std::string text_to_hash = text.toStdString();
-		std::hash<std::string> hasher;
-		const size_t text_hash = hasher(text_to_hash);
-		const size_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-		m_HistoryView->AddToHistory(text, text_hash, timestamp);
-	}
+	m_HistoryView->AddToHistory(text, timestamp);
 }
