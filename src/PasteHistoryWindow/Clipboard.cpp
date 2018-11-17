@@ -1,5 +1,7 @@
 #include "Clipboard.h"
 
+#include <chrono>
+
 #include <QApplication>
 #include <QClipboard>
 #include <QDebug>
