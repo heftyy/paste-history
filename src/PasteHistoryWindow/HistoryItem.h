@@ -19,9 +19,8 @@ Q_DECLARE_METATYPE(HistoryItemData)
 
 struct HistoryItem
 {
-	HistoryItem(HistoryItemData item);
+	HistoryItem(HistoryItemData item_data);
 
 	HistoryItemData m_HistoryItemData;
-	FuzzySearch::PatternMatch m_PatternMatch;
 	std::string m_DisplayText;
 };

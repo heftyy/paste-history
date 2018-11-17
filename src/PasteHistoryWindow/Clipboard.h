@@ -13,7 +13,7 @@ Q_SIGNALS:
 	void DataChanged(const std::string& text);
 
 private:
-	class QTimer* m_RetryTimer;
+	class QTimer* m_DelayTimer;
 
 	void OnClipboardChanged();
 	void RetrieveClipboardData();

@@ -7,9 +7,48 @@
 #include "HistoryItem.h"
 #include "HistoryViewConstants.h"
 
+std::vector<int> BuildFilterMapping(std::string_view filter_pattern, const std::vector<HistoryItem>& history_items)
+{
+	std::vector<int> filter_proxy_mapping;
+	filter_proxy_mapping.reserve(history_items.size());
+
+	std::vector<FuzzySearch::SearchResult> search_results;
+	search_results.reserve(history_items.size());
+
+	for (int history_item_index = 0; history_item_index < history_items.size(); ++history_item_index)
+	{
+		const HistoryItemData& history_item_data = history_items[history_item_index].m_HistoryItemData;
+		FuzzySearch::PatternMatch pattern_match = FuzzySearch::FuzzyMatch(filter_pattern, history_item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS);
+		search_results.push_back({history_item_data.m_Text, pattern_match});
+		if (pattern_match.m_Score > 0)
+		{
+			filter_proxy_mapping.push_back(history_item_index);
+		}
+	}
+
+	std::sort(filter_proxy_mapping.begin(), filter_proxy_mapping.end(), [&search_results](int lhs, int rhs) 
+	{
+		if (lhs >= 0 && rhs >= 0)
+		{
+			return FuzzySearch::SearchResultComparator(search_results[lhs], search_results[rhs]);
+		}
+		else
+		{
+			if (lhs >= 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	});
+
+	return filter_proxy_mapping;
+}
+
 HistoryItemModel::HistoryItemModel(QObject* parent)
     : QAbstractItemModel(parent)
 {
+	m_HistoryItems.reserve(128);
 }
 
 QVariant HistoryItemModel::data(const QModelIndex& index, int role) const
@@ -17,9 +56,11 @@ QVariant HistoryItemModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::DisplayRole)
 	{
 		int source_index = MapToSource(index);
-		return QString::fromStdString(m_HistoryItems[source_index].m_DisplayText);
+		if (source_index >= 0 && source_index < m_HistoryItems.size())
+		{
+			return QString::fromStdString(m_HistoryItems[source_index].m_DisplayText);
+		}
 	}
-	// assert(false, "data for role %d not implemented", role);
 	return QVariant();
 }
 
@@ -27,7 +68,14 @@ int HistoryItemModel::rowCount(const QModelIndex& parent) const
 {
 	if (!parent.isValid())
 	{
-		return gsl::narrow_cast<int>(m_HistoryItems.size());
+		if (IsFilterEnabled())
+		{
+			return gsl::narrow_cast<int>(m_FilterProxyMapping.size());
+		}
+		else
+		{
+			return gsl::narrow_cast<int>(m_HistoryItems.size());
+		}
 	}
 	return 0;
 }
@@ -55,10 +103,10 @@ QModelIndex HistoryItemModel::parent(const QModelIndex&) const
 	return QModelIndex();
 }
 
-bool HistoryItemModel::UpdateFilterPattern(const QString& pattern, bool force)
+bool HistoryItemModel::UpdateFilterPattern(const QString& pattern)
 {
 	std::string pattern_str = pattern.toStdString();
-	if (!force && m_FilterPattern == pattern_str)
+	if (m_FilterPattern == pattern_str)
 		return false;
 
 	m_FilterPattern = pattern_str;
@@ -70,36 +118,16 @@ bool HistoryItemModel::UpdateFilterPattern(const QString& pattern, bool force)
 void HistoryItemModel::AddToHistory(HistoryItemData history_item_data)
 {
 	//! Check if the history already contains given item
-	auto history_item_found = m_TextHashToIndex.find(history_item_data.m_TextHash);
-	if (history_item_found != m_TextHashToIndex.end())
+	auto history_item_found = m_TextHashToTimestampIndex.find(history_item_data.m_TextHash);
+	if (history_item_found != m_TextHashToTimestampIndex.end())
 	{
-		size_t data_item_index = history_item_found->second;
-		HistoryItemData& data_by_text_hash = m_HistoryItems[data_item_index].m_HistoryItemData;
-		//! The item already existed in history, replace our timestamp in the model with the new one
-		data_by_text_hash.m_Timestamp = history_item_data.m_Timestamp;
-		Invalidate();
+		HistoryItem& history_item = m_HistoryItems[history_item_found->second];
+		UpdateTimestampForHistoryItem(history_item.m_HistoryItemData, history_item_data.m_Timestamp);
 	}
 	else
 	{
-		//! Inserting a new item, look up the place where to insert it in the proxy mapping
-		auto timestamp_compare = [this](const HistoryItem& item, size_t timestamp) { return item.m_HistoryItemData.m_Timestamp <= timestamp; };
-		auto timestamp_found = std::lower_bound(m_HistoryItems.begin(), m_HistoryItems.end(), history_item_data.m_Timestamp, timestamp_compare);
+		AddNewHistoryItem(history_item_data);
 
-		size_t insert_at_index = std::distance(m_HistoryItems.begin(), timestamp_found);
-		int proxy_index = gsl::narrow<int>(m_HistoryItems.size() - insert_at_index);
-
-		m_HistoryItems.emplace(m_HistoryItems.begin() + insert_at_index, history_item_data);
-		if (!IsFilterEnabled())
-		{
-			beginInsertRows(QModelIndex(), proxy_index, proxy_index);
-			m_TextHashToIndex[history_item_data.m_TextHash] = insert_at_index;
-			m_ProxyMapping.
-			endInsertRows();
-		}
-		else
-		{
-			Invalidate();
-		}
 	}
 }
 
@@ -114,14 +142,15 @@ void HistoryItemModel::AddToHistory(const std::vector<HistoryItemData>& history_
 const HistoryItemData& HistoryItemModel::GetHistoryItemData(int index) const
 {
 	int source_index = MapToSource(createIndex(index, 0));
-	return m_HistoryItems.at(source_index).m_HistoryItemData;
+	return m_HistoryItems[source_index].m_HistoryItemData;
 }
 
 void HistoryItemModel::Clear()
 {
-	beginRemoveRows(QModelIndex(), 0, gsl::narrow_cast<int>(m_HistoryItems.size()));
+	beginRemoveRows(QModelIndex(), 0, gsl::narrow_cast<int>(m_HistoryItems.size() - 1));
 	m_HistoryItems.clear();
-	m_ProxyMapping.clear();
+	m_FilterProxyMapping.clear();
+	m_TextHashToTimestampIndex.clear();
 	endRemoveRows();
 }
 
@@ -133,45 +162,27 @@ bool HistoryItemModel::IsFilterEnabled() const
 void HistoryItemModel::Invalidate()
 {
 	beginResetModel();
-	RebuildProxyMapping();
-	endResetModel();
-}
-
-void HistoryItemModel::RebuildProxyMapping()
-{
 	if (IsFilterEnabled())
 	{
-		m_ProxyMapping.clear();
-		m_ProxyMapping.reserve(m_HistoryItems.size());
-
-		int history_item_index = 0;
-		for (HistoryItem& history_item : m_HistoryItems)
-		{
-			history_item.m_PatternMatch = FuzzySearch::FuzzyMatch(m_FilterPattern, history_item.m_HistoryItemData.m_Text, FuzzySearch::MatchMode::E_STRINGS);
-			if (history_item.m_PatternMatch.m_Score > 0)
-			{
-				m_ProxyMapping.push_back(history_item_index);
-			}
-			else
-			{
-				m_ProxyMapping.push_back(-1);
-			}
-			++history_item_index;
-		}
-
-		std::sort(m_ProxyMapping.begin(), m_ProxyMapping.end(), [this](int lhs, int rhs) { return LessThan(lhs, rhs); });
+		m_FilterProxyMapping = BuildFilterMapping(m_FilterPattern, m_HistoryItems);
 	}
 
-	//m_TimestampMapping.push_back()
-	m_ProxyMapping.resize(m_HistoryItems.size());
-	std::iota(m_ProxyMapping.rbegin(), m_ProxyMapping.rend(), 0);
+	endResetModel();
 }
 
 int HistoryItemModel::MapToSource(QModelIndex index) const
 {
 	if (index.row() >= 0)
 	{
-		return m_ProxyMapping.at(index.row());
+		if (IsFilterEnabled())
+		{
+			Ensures(index.row() < m_FilterProxyMapping.size());
+			return m_FilterProxyMapping[index.row()];
+		}
+		else
+		{
+			return gsl::narrow_cast<int>(m_HistoryItems.size()) - index.row() - 1;
+		}
 	}
 	else
 	{
@@ -179,31 +190,40 @@ int HistoryItemModel::MapToSource(QModelIndex index) const
 	}
 }
 
-bool HistoryItemModel::LessThan(int lhs_index, int rhs_index)
+void HistoryItemModel::AddNewHistoryItem(const HistoryItemData& history_item_data)
 {
-	if (lhs_index >= 0 && rhs_index >= 0)
+	auto timestamp_compare = [](const HistoryItem& item, size_t timestamp) { return item.m_HistoryItemData.m_Timestamp <= timestamp; };
+	auto timestamp_found = std::lower_bound(m_HistoryItems.begin(), m_HistoryItems.end(), history_item_data.m_Timestamp, timestamp_compare);
+
+	size_t insert_at_index = std::distance(m_HistoryItems.begin(), timestamp_found);
+	Ensures(insert_at_index <= m_HistoryItems.size());
+	int proxy_index = gsl::narrow<int>(m_HistoryItems.size() - insert_at_index);
+
+	if (!IsFilterEnabled())
 	{
-		const FuzzySearch::PatternMatch& left_match = m_HistoryItems[lhs_index].m_PatternMatch;
-		const FuzzySearch::PatternMatch& right_match = m_HistoryItems[rhs_index].m_PatternMatch;
-
-		if (left_match.m_Score > right_match.m_Score)
-		{
-			return true;
-		}
-		else if (left_match.m_Score == right_match.m_Score)
-		{
-			const HistoryItemData& left_data = m_HistoryItems[lhs_index].m_HistoryItemData;
-			const HistoryItemData& right_data = m_HistoryItems[rhs_index].m_HistoryItemData;
-
-			return left_data.m_Text.size() < right_data.m_Text.size();
-		}
+		beginInsertRows(QModelIndex(), proxy_index, proxy_index);
+		m_HistoryItems.emplace(m_HistoryItems.begin() + insert_at_index, history_item_data);
+		m_TextHashToTimestampIndex[history_item_data.m_TextHash] = insert_at_index;
+		endInsertRows();
 	}
 	else
 	{
-		if (lhs_index >= 0)
-		{
-			return true;
-		}
+		m_HistoryItems.emplace(m_HistoryItems.begin() + insert_at_index, history_item_data);
+		Invalidate();
 	}
-	return false;
+}
+
+void HistoryItemModel::UpdateTimestampForHistoryItem(HistoryItemData& history_item_data, size_t timestamp)
+{
+	HistoryItemData& data_by_text_hash = history_item_data;
+	data_by_text_hash.m_Timestamp = timestamp;
+	std::sort(m_HistoryItems.begin(), m_HistoryItems.end(),
+	          [](const HistoryItem& lhs, const HistoryItem& rhs) { return lhs.m_HistoryItemData.m_Timestamp <= rhs.m_HistoryItemData.m_Timestamp; });
+
+	for (size_t index = 0; index < m_HistoryItems.size(); ++index)
+	{
+		m_TextHashToTimestampIndex[m_HistoryItems[index].m_HistoryItemData.m_TextHash] = index;
+	}
+
+	Invalidate();
 }

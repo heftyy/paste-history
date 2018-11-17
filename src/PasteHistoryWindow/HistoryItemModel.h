@@ -20,7 +20,7 @@ public:
 	QModelIndex parent(const QModelIndex&) const override;
 
 	//!< Updates the filter pattern and might force a filter and resort, returns true if proxy model changed
-	bool UpdateFilterPattern(const QString& pattern, bool force = false);
+	bool UpdateFilterPattern(const QString& pattern);
 	void AddToHistory(HistoryItemData history_item_data);
 	void AddToHistory(const std::vector<HistoryItemData>& history_items_data);	
 
@@ -30,16 +30,18 @@ public:
 private:
 	std::string m_FilterPattern;
 	std::vector<HistoryItem> m_HistoryItems;
-	std::vector<int> m_ProxyMapping;
-	std::unordered_map<size_t, size_t> m_TextHashToIndex;
+	std::vector<int> m_FilterProxyMapping;
+	std::unordered_map<size_t, size_t> m_TextHashToTimestampIndex;
 
 	bool m_IsFilteringEnabled = false;
 
 	bool IsFilterEnabled() const;
 	void Invalidate();
 
-	void RebuildProxyMapping();
 	int MapToSource(QModelIndex index) const;
 
-	bool LessThan(int lhs_index, int rhs_index);
+	//! Inserting a new item, look up the place where to insert it in the proxy mapping
+	void AddNewHistoryItem(const HistoryItemData& history_item_data);
+	//! The item already existed in history, replace our timestamp in the model with the new one
+	void UpdateTimestampForHistoryItem(HistoryItemData& history_item, size_t timestamp);
 };

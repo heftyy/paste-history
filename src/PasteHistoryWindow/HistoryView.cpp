@@ -11,7 +11,9 @@ HistoryView::HistoryView(QWidget* parent)
     : QListView(parent)
 {
 	m_HistoryItemModel = new HistoryItemModel(this);
+#ifndef NDEBUG
 	new QAbstractItemModelTester(m_HistoryItemModel, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
+#endif
 	setModel(m_HistoryItemModel);
 
 	installEventFilter(this);

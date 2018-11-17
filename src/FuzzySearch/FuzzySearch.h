@@ -38,6 +38,8 @@ constexpr size_t max_pattern_length = 256;
 
 PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode);
 
+bool SearchResultComparator(const SearchResult& lhs, const SearchResult& rhs) noexcept;
+
 template <typename Iterator, typename Func>
 std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Iterator end, Func&& get_string_func, MatchMode match_mode)
 {
@@ -69,18 +71,7 @@ std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Itera
 		}
 	});
 
-	std::sort(search_results.begin(), search_results.end(), [](const SearchResult& lhs, const SearchResult& rhs) noexcept 
-	{
-		if (lhs.m_PatternMatch.m_Score > rhs.m_PatternMatch.m_Score)
-		{
-			return true;
-		}
-		else if (lhs.m_PatternMatch.m_Score == rhs.m_PatternMatch.m_Score)
-		{
-			return lhs.m_String.size() < rhs.m_String.size();
-		}
-		return false;
-	});
+	std::sort(search_results.begin(), search_results.end(), SearchResultComparator);
 
 	return search_results;
 }

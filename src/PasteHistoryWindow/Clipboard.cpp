@@ -16,15 +16,18 @@ Clipboard::Clipboard(QObject* parent)
 	const QClipboard* clipboard = QApplication::clipboard();
 	connect(clipboard, &QClipboard::dataChanged, this, &Clipboard::OnClipboardChanged);
 
-	m_RetryTimer = new QTimer(this);
-	m_RetryTimer->setInterval(std::chrono::milliseconds(10));
-	m_RetryTimer->setSingleShot(true);
-	connect(m_RetryTimer, &QTimer::timeout, this, &Clipboard::RetrieveClipboardData);
+	m_DelayTimer = new QTimer(this);
+	m_DelayTimer->setInterval(std::chrono::milliseconds(10));
+	m_DelayTimer->setSingleShot(true);
+	connect(m_DelayTimer, &QTimer::timeout, this, &Clipboard::RetrieveClipboardData);
 }
 
 void Clipboard::OnClipboardChanged()
 {
-	m_RetryTimer->start();
+	//! (QTBUG-53979)
+	//! Unfortunately some programs don't release the clipboard handle soon enough so we end up clipboard->text() being empty.
+	//! Adding a delay timer seems like a decent workaround even though it makes me pretty sad.
+	m_DelayTimer->start();
 }
 
 void Clipboard::RetrieveClipboardData()

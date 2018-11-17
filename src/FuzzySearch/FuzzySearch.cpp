@@ -90,8 +90,8 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 		// Check for bonuses based on neighbor character value
 		if (curr_index > 0 && (match_mode == MatchMode::E_FILENAMES || match_mode == MatchMode::E_SOURCE_FILES))
 		{
-			const char neighbor = str.at(curr_index - 1);
-			const char curr = str.at(curr_index);
+			const char neighbor = str[curr_index - 1];
+			const char curr = str[curr_index];
 
 			// Camel case
 			if ((IsLower(neighbor) || neighbor == '\\' || neighbor == '/') && IsUpper(curr))
@@ -147,7 +147,7 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 inline int FindSequentialMatch(std::string_view pattern, int pattern_index, std::string_view str, int str_index) noexcept
 {
 	// The pattern characters usually mismatch str characters so this early out just helps optizmier/cpu
-	if (ToLower(pattern.at(pattern_index)) != ToLower(str.at(str_index)))
+	if (ToLower(pattern[pattern_index]) != ToLower(str[str_index]))
 	{
 		return 0;
 	}
@@ -156,7 +156,7 @@ inline int FindSequentialMatch(std::string_view pattern, int pattern_index, std:
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
 	int matched_chars = 0;
-	while (ToLower(pattern.at(pattern_index + matched_chars)) == ToLower(str.at(str_index + matched_chars)))
+	while (ToLower(pattern[pattern_index + matched_chars]) == ToLower(str[str_index + matched_chars]))
 	{
 		++matched_chars;
 		if (pattern_index + matched_chars >= pattern_length || str_index + matched_chars >= str_length)
@@ -187,7 +187,7 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
 			pattern_index += gsl::narrow_cast<int>(match.m_Matches.size() - 1);
 		}
-		else if (pattern.at(pattern_index) != ' ')
+		else if (pattern[pattern_index] != ' ')
 		{
 			++unmatched_characters_from_pattern;
 		}
@@ -221,14 +221,14 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 	// Loop through pattern and str looking for a match
 	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
 	{
-		pattern_matches.at(pattern_index).m_Score = 0;
+		pattern_matches[pattern_index].m_Score = 0;
 
 		const int pattern_start = pattern_index;
 		int best_match_length = 0;
 
 		// When pattern contains a space, start a search from the beginning of str
 		// again to allow out of order matches from the pattern
-		if (pattern.at(pattern_index) == ' ')
+		if (pattern[pattern_index] == ' ')
 		{
 			str_start = 0;
 			continue;
@@ -245,11 +245,11 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 				const auto match_span = gsl::span<int>(match_indexes.data(), match_length);
 				const int match_score = CalculateSequentialMatchScore(str, last_path_separator_index, match_mode, match_span);
 
-				if (match_score > pattern_matches.at(pattern_index).m_Score)
+				if (match_score > pattern_matches[pattern_index].m_Score)
 				{
 					best_match_length = match_length;
 
-					PatternMatch& match = pattern_matches.at(pattern_index);
+					PatternMatch& match = pattern_matches[pattern_index];
 					match.m_Score = match_score;
 					match.m_Matches.assign(match_indexes.begin(), match_indexes.begin() + best_match_length);
 
@@ -262,13 +262,26 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 			}
 		}
 
-		if (pattern_matches.at(pattern_index).m_Score > 0)
+		if (pattern_matches[pattern_index].m_Score > 0)
 		{
 			pattern_index += best_match_length - 1;
 		}
 	}
 
 	return CalculatePatternScore(pattern, gsl::span<PatternMatch>(pattern_matches.data(), pattern_length));
+}
+
+bool SearchResultComparator(const SearchResult& lhs, const SearchResult& rhs) noexcept
+{
+	if (lhs.m_PatternMatch.m_Score > rhs.m_PatternMatch.m_Score)
+	{
+		return true;
+	}
+	else if (lhs.m_PatternMatch.m_Score == rhs.m_PatternMatch.m_Score)
+	{
+		return lhs.m_String.size() < rhs.m_String.size();
+	}
+	return false;
 }
 
 } // namespace FuzzySearch

@@ -46,8 +46,9 @@ void BM_ModelInsert(benchmark::State& state)
 	{
 		for (auto i = 0; i < state.range(0); ++i)
 		{
-			for (const std::string& text : strings)
+			for (std::string text : strings)
 			{
+				text += std::to_string(i);
 				std::hash<std::string> hasher;
 				const size_t text_hash = hasher(text);
 				history_model.AddToHistory({text, text_hash, GetTimestamp()});
@@ -75,17 +76,20 @@ void BM_BasicInsert(benchmark::State& state)
 	{
 		for (auto i = 0; i < state.range(0); ++i)
 		{
-			for (const std::string& text : strings)
+			for (std::string text : strings)
 			{
+				text += std::to_string(i);
 				std::hash<std::string> hasher;
 				const size_t text_hash = hasher(text);
 				history_items.emplace_back(HistoryItemData{text, text_hash, GetTimestamp()});
 			}
 		}
+		history_items.clear();
 	}
 }
-HISTORY_MODEL_BENCHMARK(BM_BasicInsert);
+//HISTORY_MODEL_BENCHMARK(BM_BasicInsert);
 
+#include <thread>
 void BM_ModelFilterAndSort(benchmark::State& state)
 {
 	std::vector<std::string> strings = {
@@ -102,17 +106,22 @@ void BM_ModelFilterAndSort(benchmark::State& state)
 	std::vector<HistoryItemData> history_items_data;
 	for (auto i = 0; i < state.range(0); ++i)
 	{
-		for (const std::string& text : strings)
+		for (std::string text : strings)
 		{
+			text += std::to_string(i);
 			std::hash<std::string> hasher;
 			const size_t text_hash = hasher(text);
 			history_model.AddToHistory({text, text_hash, GetTimestamp()});
 		}
 	}
 
+	bool pattern_switch = false;
 	for (const auto _ : state)
 	{
-		bool result = history_model.UpdateFilterPattern("add", true);
+		//! Need to switch the pattern for every other search because UpdateFilterPattern won't search and resort
+		//! for the same pattern twice in a row
+		bool result = history_model.UpdateFilterPattern(pattern_switch ? "add1" : "add2");
+		pattern_switch = !pattern_switch;
 		benchmark::DoNotOptimize(result);
 	}
 }
@@ -120,7 +129,7 @@ void BM_ModelFilterAndSort(benchmark::State& state)
 
 void BM_BasicFilterAndSort(benchmark::State& state)
 {
-	std::vector<std::string> base_strings = {
+	std::vector<std::string> strings = {
 	    "git init",
 	    "git status",
 	    "git add my_new_file.txt",
@@ -133,9 +142,10 @@ void BM_BasicFilterAndSort(benchmark::State& state)
 
 	for (auto i = 0; i < state.range(0); ++i)
 	{
-		for (const std::string& str : base_strings)
+		for (std::string text : strings)
 		{
-			benchmark_strings.push_back({str, 0});
+			text += std::to_string(i);
+			benchmark_strings.push_back({text, 0});
 		}
 	}
 
