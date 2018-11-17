@@ -30,7 +30,7 @@ public:
 private:
 	std::string m_FilterPattern;
 	std::vector<HistoryItem> m_HistoryItems;
-	std::vector<int> m_FilterProxyMapping;
+	std::vector<size_t> m_FilterProxyMapping;
 	std::unordered_map<size_t, size_t> m_TextHashToTimestampIndex;
 
 	bool m_IsFilteringEnabled = false;

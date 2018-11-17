@@ -7,15 +7,15 @@
 #include "HistoryItem.h"
 #include "HistoryViewConstants.h"
 
-std::vector<int> BuildFilterMapping(std::string_view filter_pattern, const std::vector<HistoryItem>& history_items)
+std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const std::vector<HistoryItem>& history_items)
 {
-	std::vector<int> filter_proxy_mapping;
+	std::vector<size_t> filter_proxy_mapping;
 	filter_proxy_mapping.reserve(history_items.size());
 
 	std::vector<FuzzySearch::SearchResult> search_results;
 	search_results.reserve(history_items.size());
 
-	for (int history_item_index = 0; history_item_index < history_items.size(); ++history_item_index)
+	for (size_t history_item_index = 0; history_item_index < history_items.size(); ++history_item_index)
 	{
 		const HistoryItemData& history_item_data = history_items[history_item_index].m_HistoryItemData;
 		FuzzySearch::PatternMatch pattern_match = FuzzySearch::FuzzyMatch(filter_pattern, history_item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS);
@@ -26,20 +26,9 @@ std::vector<int> BuildFilterMapping(std::string_view filter_pattern, const std::
 		}
 	}
 
-	std::sort(filter_proxy_mapping.begin(), filter_proxy_mapping.end(), [&search_results](int lhs, int rhs) 
+	std::sort(filter_proxy_mapping.begin(), filter_proxy_mapping.end(), [&search_results](size_t lhs, size_t rhs) 
 	{
-		if (lhs >= 0 && rhs >= 0)
-		{
-			return FuzzySearch::SearchResultComparator(search_results[lhs], search_results[rhs]);
-		}
-		else
-		{
-			if (lhs >= 0)
-			{
-				return true;
-			}
-		}
-		return false;
+		return FuzzySearch::SearchResultComparator(search_results[lhs], search_results[rhs]);
 	});
 
 	return filter_proxy_mapping;
@@ -56,7 +45,7 @@ QVariant HistoryItemModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::DisplayRole)
 	{
 		int source_index = MapToSource(index);
-		if (source_index >= 0 && source_index < m_HistoryItems.size())
+		if (source_index >= 0 && source_index < gsl::narrow_cast<int>(m_HistoryItems.size()))
 		{
 			return QString::fromStdString(m_HistoryItems[source_index].m_DisplayText);
 		}
@@ -91,7 +80,7 @@ int HistoryItemModel::columnCount(const QModelIndex& parent) const
 
 QModelIndex HistoryItemModel::index(int row, int column, const QModelIndex& parent) const
 {
-	if (row >= 0 && column >= 0 && row < m_HistoryItems.size() && !parent.isValid())
+	if (row >= 0 && column >= 0 && row < gsl::narrow_cast<int>(m_HistoryItems.size()) && !parent.isValid())
 	{
 		return createIndex(row, column);
 	}
@@ -176,8 +165,9 @@ int HistoryItemModel::MapToSource(QModelIndex index) const
 	{
 		if (IsFilterEnabled())
 		{
-			Ensures(index.row() < m_FilterProxyMapping.size());
-			return m_FilterProxyMapping[index.row()];
+			size_t row_index = gsl::narrow_cast<size_t>(index.row());
+			Ensures(row_index < m_FilterProxyMapping.size());
+			return gsl::narrow_cast<int>(m_FilterProxyMapping[row_index]);
 		}
 		else
 		{

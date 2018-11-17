@@ -41,11 +41,10 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 bool SearchResultComparator(const SearchResult& lhs, const SearchResult& rhs) noexcept;
 
 template <typename Iterator, typename Func>
-std::vector<SearchResult> Search(std::string_view pattern, Iterator begin, Iterator end, Func&& get_string_func, MatchMode match_mode)
+std::vector<SearchResult> Search(std::string_view pattern, Iterator&& begin, Iterator&& end, Func&& get_string_func, MatchMode match_mode)
 {
-	static_assert(std::is_function<std::remove_pointer<Func>::type>::value, "get_string_func needs to be a pointer to function");
-	static_assert(std::is_same<std::result_of<Func(typename std::iterator_traits<Iterator>::value_type)>::type, std::string_view>::value,
-	              "get_string_func must return std::string_view");
+	static_assert(std::is_invocable_r<std::string_view, decltype(get_string_func), typename std::iterator_traits<Iterator>::value_type>::value,
+	              "get_string_func needs to be a pointer to function returning std::string_view");
 
 	if (pattern.empty())
 	{

@@ -87,7 +87,7 @@ void BM_BasicInsert(benchmark::State& state)
 		history_items.clear();
 	}
 }
-//HISTORY_MODEL_BENCHMARK(BM_BasicInsert);
+HISTORY_MODEL_BENCHMARK(BM_BasicInsert);
 
 #include <thread>
 void BM_ModelFilterAndSort(benchmark::State& state)
@@ -125,7 +125,7 @@ void BM_ModelFilterAndSort(benchmark::State& state)
 		benchmark::DoNotOptimize(result);
 	}
 }
-//HISTORY_MODEL_BENCHMARK(BM_ModelFilterAndSort);
+HISTORY_MODEL_BENCHMARK(BM_ModelFilterAndSort);
 
 void BM_BasicFilterAndSort(benchmark::State& state)
 {
@@ -155,6 +155,6 @@ void BM_BasicFilterAndSort(benchmark::State& state)
 		benchmark::DoNotOptimize(result);
 	}
 }
-//HISTORY_MODEL_BENCHMARK(BM_BasicFilterAndSort);
+HISTORY_MODEL_BENCHMARK(BM_BasicFilterAndSort);
 
 BENCHMARK_MAIN();
