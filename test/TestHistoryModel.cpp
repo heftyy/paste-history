@@ -4,7 +4,8 @@
 
 #include <HistoryItem.h>
 #include <HistoryItemModel.h>
-#include <QStandardItemModel>
+
+#include <QAbstractItemModelTester>
 
 static size_t GetTimestamp()
 {
@@ -14,10 +15,7 @@ static size_t GetTimestamp()
 
 static std::string GetStringFromModel(const HistoryItemModel& history_model, int row_index)
 {
-	QModelIndex source_index = history_model.mapToSource(history_model.index(row_index, 0));
-	QStandardItemModel* source_model = qobject_cast<QStandardItemModel*>(history_model.sourceModel());
-	HistoryItem* item = dynamic_cast<HistoryItem*>(source_model->itemFromIndex(source_index));
-	return item->GetHistoryItemData().m_Text;
+	return history_model.GetHistoryItemData(row_index).m_Text;
 };
 
 TEST(TestHistoryModel, TimestampOrder)
@@ -31,10 +29,8 @@ TEST(TestHistoryModel, TimestampOrder)
 	    "git remote add origin https://github.com/heftyy/fuzzy-search.git",
 	};
 
-	QStandardItemModel model;
 	HistoryItemModel history_model(nullptr);
-	history_model.setSourceModel(&model);
-	history_model.sort(0, Qt::DescendingOrder);
+	auto tester = QAbstractItemModelTester(&history_model, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
 	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		std::hash<std::string> hasher;
@@ -58,10 +54,8 @@ TEST(TestHistoryModel, SearchOrder)
 	    "git remote add origin https://github.com/heftyy/fuzzy-search.git",
 	};
 
-	QStandardItemModel model;
 	HistoryItemModel history_model(nullptr);
-	history_model.setSourceModel(&model);
-	history_model.sort(0, Qt::DescendingOrder);
+	auto tester = QAbstractItemModelTester(&history_model, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
 	for (const std::string& text : strings)
 	{
 		std::hash<std::string> hasher;

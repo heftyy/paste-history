@@ -5,11 +5,13 @@
 
 #include "HistoryItemModel.h"
 
+#include <QAbstractItemModelTester>
+
 HistoryView::HistoryView(QWidget* parent)
     : QListView(parent)
 {
 	m_HistoryItemModel = new HistoryItemModel(this);
-	m_HistoryItemModel->sort(0, Qt::DescendingOrder);
+	new QAbstractItemModelTester(m_HistoryItemModel, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
 	setModel(m_HistoryItemModel);
 
 	installEventFilter(this);
@@ -24,7 +26,7 @@ void HistoryView::AddToHistory(const std::string& text, size_t timestamp)
 
 bool HistoryView::IsShortutKey(const QKeyEvent* key_event)
 {
-	if (key_event && key_event->type() == QEvent::KeyPress || key_event->type() == QEvent::KeyRelease)
+	if (key_event && (key_event->type() == QEvent::KeyPress || key_event->type() == QEvent::KeyRelease))
 	{
 		const bool control_pressed = key_event->modifiers() & Qt::CTRL;
 		const bool number_pressed = key_event->key() >= Qt::Key_0 && key_event->key() <= Qt::Key_9;

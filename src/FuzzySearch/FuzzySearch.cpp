@@ -202,18 +202,6 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 	return out_match;
 }
 
-std::vector<PatternMatch>& GetPatternMatches()
-{
-	static std::vector<PatternMatch> pattern_matches(256);
-	return pattern_matches;
-}
-
-std::vector<int>& GetMatchIndexes()
-{
-	static std::vector<int> match_indexes(256);
-	return match_indexes;
-}
-
 PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode)
 {
 	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
@@ -221,8 +209,8 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 
 	int str_start = 0;
 
-	std::vector<PatternMatch>& pattern_matches = GetPatternMatches();
-	std::vector<int>& match_indexes = GetMatchIndexes();
+	std::vector<PatternMatch> pattern_matches(pattern_length);
+	std::vector<int> match_indexes(pattern_length);
 
 	int last_path_separator_index = 0;
 	if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)

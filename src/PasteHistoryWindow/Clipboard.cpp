@@ -5,8 +5,10 @@
 #include <QDebug>
 #include <QTimer>
 
+#ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <qt_windows.h>
+#endif
 
 Clipboard::Clipboard(QObject* parent)
     : QObject(parent)
@@ -27,8 +29,10 @@ void Clipboard::OnClipboardChanged()
 
 void Clipboard::RetrieveClipboardData()
 {
+#ifdef WIN32
 	const DWORD newClipboardSequenceNumber = GetClipboardSequenceNumber();
 	qDebug() << "clipboard seq: " << newClipboardSequenceNumber;
+#endif
 
 	QString text = QApplication::clipboard()->text();
 	if (!text.isEmpty())
