@@ -5,14 +5,18 @@
 
 #include "HistoryItemModel.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 #include <QAbstractItemModelTester>
+#endif
 
 HistoryView::HistoryView(QWidget* parent)
     : QListView(parent)
 {
 	m_HistoryItemModel = new HistoryItemModel(this);
 #ifndef NDEBUG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 	new QAbstractItemModelTester(m_HistoryItemModel, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
+#endif
 #endif
 	setModel(m_HistoryItemModel);
 

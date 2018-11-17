@@ -30,6 +30,7 @@ before_script:
 script:
   - make -j2 && ctest -j2
   - ./bin/fuzzy_search_benchmark
+  - ./bin/history_model_benchmark
 
 notifications:
   email: false

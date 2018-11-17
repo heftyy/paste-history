@@ -5,7 +5,9 @@
 #include <HistoryItem.h>
 #include <HistoryItemModel.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 #include <QAbstractItemModelTester>
+#endif
 
 static size_t GetTimestamp()
 {
@@ -30,7 +32,9 @@ TEST(TestHistoryModel, TimestampOrder)
 	};
 
 	HistoryItemModel history_model(nullptr);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 	auto tester = QAbstractItemModelTester(&history_model, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
+#endif
 	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		std::hash<std::string> hasher;
@@ -62,7 +66,9 @@ TEST(TestHistoryModel, TimestampOrderWithUpdates)
 	};
 
 	HistoryItemModel history_model(nullptr);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 	auto tester = QAbstractItemModelTester(&history_model, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
+#endif
 	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		std::hash<std::string> hasher;
@@ -92,7 +98,9 @@ TEST(TestHistoryModel, SearchOrder)
 	};
 
 	HistoryItemModel history_model(nullptr);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 	auto tester = QAbstractItemModelTester(&history_model, QAbstractItemModelTester::FailureReportingMode::Fatal, nullptr);
+#endif
 	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		std::hash<std::string> hasher;
