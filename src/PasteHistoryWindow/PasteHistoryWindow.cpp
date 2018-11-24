@@ -34,10 +34,15 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 
 void PasteHistoryWindow::Start()
 {
+	m_HistoryView->AddToHistory("blum1", 1);
+	m_HistoryView->AddToHistory("blam2", 2);
+	m_HistoryView->AddToHistory("blam5", 5);
+	m_HistoryView->AddToHistory("blam78", 78);
+
 	show();
 
-	m_HistoryView->AddToHistory("blum", 1);
-	m_HistoryView->AddToHistory("blam", 2);
+	m_HistoryView->AddToHistory("blam3", 3);
+	m_HistoryView->AddToHistory("blam105", 105);
 }
 
 void PasteHistoryWindow::showEvent(QShowEvent* event)

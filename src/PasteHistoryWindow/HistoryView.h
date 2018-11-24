@@ -15,6 +15,10 @@ public:
 public Q_SLOTS:
 	void UpdateFilterPattern(QString pattern);
 
+protected:
+	QSize sizeHint() const override;
+	QSize viewportSizeHint() const override;
+
 private:
 	class HistoryItemModel* m_HistoryItemModel;
 };

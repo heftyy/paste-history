@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 
+#include "HistoryItemDelegate.h"
 #include "HistoryItemModel.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
@@ -19,6 +20,14 @@ HistoryView::HistoryView(QWidget* parent)
 #endif
 #endif
 	setModel(m_HistoryItemModel);
+	setItemDelegate(new HistoryItemDelegate(this));
+
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+	//setResizeMode(QListView::Adjust);
+	//setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	setUniformItemSizes(true);
 
 	installEventFilter(this);
 }
@@ -45,8 +54,23 @@ bool HistoryView::IsShortutKey(const QKeyEvent* key_event)
 
 void HistoryView::UpdateFilterPattern(QString pattern)
 {
-	if (m_HistoryItemModel->UpdateFilterPattern(pattern))
+	m_HistoryItemModel->UpdateFilterPattern(pattern);
+}
+
+QSize HistoryView::sizeHint() const
+{
+	const QSize hint = QSize(0, 0);
+	if (model() && model()->rowCount() > 0)
 	{
-		update();
+		const QSize item_size = sizeHintForIndex(model()->index(0, 0));
+		const int item_count = std::min(10, model()->rowCount());
+		const int view_height = item_count * item_size.height() + 5;
+		return QSize(item_size.width(), view_height);
 	}
+	return hint;
+}
+
+QSize HistoryView::viewportSizeHint() const
+{
+	return sizeHint();
 }

@@ -47,7 +47,7 @@ QVariant HistoryItemModel::data(const QModelIndex& index, int role) const
 		int source_index = MapToSource(index);
 		if (source_index >= 0 && source_index < gsl::narrow_cast<int>(m_HistoryItems.size()))
 		{
-			return QString::fromStdString(m_HistoryItems[source_index].m_DisplayText);
+			return m_HistoryItems[source_index].m_DisplayText;
 		}
 	}
 	return QVariant();
@@ -116,7 +116,6 @@ void HistoryItemModel::AddToHistory(HistoryItemData history_item_data)
 	else
 	{
 		AddNewHistoryItem(history_item_data);
-
 	}
 }
 

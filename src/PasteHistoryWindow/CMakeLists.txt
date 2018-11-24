@@ -18,6 +18,8 @@ set(PASTE_HISTORY_SOURCE_FILES
 		HistoryViewConstants.h
 		HistoryItemModel.cpp
 		HistoryItemModel.h
+		HistoryItemDelegate.cpp
+		HistoryItemDelegate.h
 		FuzzySearchBox.cpp
 		FuzzySearchBox.h
 		Clipboard.cpp

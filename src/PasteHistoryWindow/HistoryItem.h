@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include <QStandardItem>
 #include <QString>
+#include <QMetaType>
 
 #include <FuzzySearch.h>
 
@@ -22,5 +22,5 @@ struct HistoryItem
 	HistoryItem(HistoryItemData item_data);
 
 	HistoryItemData m_HistoryItemData;
-	std::string m_DisplayText;
+	QString m_DisplayText;
 };
