@@ -25,8 +25,6 @@ HistoryView::HistoryView(QWidget* parent)
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-	//setResizeMode(QListView::Adjust);
-	//setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	setUniformItemSizes(true);
 
 	installEventFilter(this);
@@ -68,9 +66,4 @@ QSize HistoryView::sizeHint() const
 		return QSize(item_size.width(), view_height);
 	}
 	return hint;
-}
-
-QSize HistoryView::viewportSizeHint() const
-{
-	return sizeHint();
 }

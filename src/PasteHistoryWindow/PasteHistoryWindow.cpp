@@ -22,6 +22,7 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	m_LineEdit = new QLineEdit(this);
 	m_LineEdit->installEventFilter(this);
 	main_layout->addWidget(m_LineEdit);
+	main_layout->setSizeConstraint(QLayout::SetFixedSize);
 
 	m_HistoryView->setFocusProxy(m_LineEdit);
 

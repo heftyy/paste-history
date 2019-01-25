@@ -17,7 +17,6 @@ public Q_SLOTS:
 
 protected:
 	QSize sizeHint() const override;
-	QSize viewportSizeHint() const override;
 
 private:
 	class HistoryItemModel* m_HistoryItemModel;
