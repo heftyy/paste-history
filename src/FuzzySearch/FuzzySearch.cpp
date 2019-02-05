@@ -172,7 +172,6 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 {
 	PatternMatch out_match;
 	out_match.m_Matches.reserve(pattern.length());
-	int unmatched_characters_from_pattern = 0;
 
 	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
 
@@ -187,16 +186,6 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
 			pattern_index += gsl::narrow_cast<int>(match.m_Matches.size() - 1);
 		}
-		else if (pattern[pattern_index] != ' ')
-		{
-			++unmatched_characters_from_pattern;
-		}
-	}
-
-	// Allow some unmatched characters (typos etc...)
-	if (unmatched_characters_from_pattern >= max_unmatched_characters_from_pattern)
-	{
-		return {0};
 	}
 
 	return out_match;
@@ -207,8 +196,6 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
 	const int str_length = gsl::narrow_cast<int>(str.length());
 
-	int str_start = 0;
-
 	std::vector<PatternMatch> pattern_matches(pattern_length);
 	std::vector<int> match_indexes(pattern_length);
 
@@ -217,6 +204,9 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 	{
 		last_path_separator_index = gsl::narrow_cast<int>(str.find_last_of("\\/"));
 	}
+	
+	int str_start = 0;
+	int unmatched_characters_from_pattern = 0;
 
 	// Loop through pattern and str looking for a match
 	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
@@ -257,14 +247,21 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 					str_index += best_match_length;
 					str_start = str_index;
 				}
-				// Search for better match for the pattern in the string
-				pattern_index = pattern_start;
 			}
 		}
 
 		if (pattern_matches[pattern_index].m_Score > 0)
 		{
 			pattern_index += best_match_length - 1;
+		}
+		else if(best_match_length == 0)
+		{
+			++unmatched_characters_from_pattern;
+			// Allow some unmatched characters (typos etc...)
+			if (unmatched_characters_from_pattern >= max_unmatched_characters_from_pattern)
+			{
+				return {0};
+			}
 		}
 	}
 
