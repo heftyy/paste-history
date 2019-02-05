@@ -213,7 +213,6 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 	{
 		pattern_matches[pattern_index].m_Score = 0;
 
-		const int pattern_start = pattern_index;
 		int best_match_length = 0;
 
 		// When pattern contains a space, start a search from the beginning of str
