@@ -243,7 +243,8 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 					match.m_Matches.assign(match_indexes.begin(), match_indexes.begin() + best_match_length);
 
 					// Skip searching for matches in str that we already used in our currect best match, doing this to improve performance
-					str_index += best_match_length;
+					// -1 because we will increment str_index at the end of the loop
+					str_index += best_match_length - 1;
 					str_start = str_index;
 				}
 			}
