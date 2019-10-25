@@ -1,11 +1,14 @@
+#include <algorithm>
 #include <cctype>
 #include <gsl/gsl>
+#include <regex>
 
 #include <benchmark/benchmark.h>
 
+#include "Files.h"
 #include <FuzzySearch.h>
 
-std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
+std::vector<std::string> StringSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
 {
 	std::vector<std::string> results;
 	results.reserve(files.size());
@@ -32,12 +35,44 @@ std::vector<std::string> NaiveSearch(const std::vector<std::string>& split_by_sp
 		{
 			results.push_back(file);
 		}
-		else
-		{
-			continue;
-		}
 	}
 
+	return results;
+}
+
+std::vector<std::string> RegexSearch(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
+{
+	std::vector<std::string> results;
+	results.reserve(files.size());
+	for (const std::string& str : split_by_space)
+	{
+		std::regex self_regex(str, std::regex_constants::icase);
+		for (const std::string& file : files)
+		{
+			if (std::regex_search(file, self_regex))
+			{
+				results.push_back(file);
+			}
+		}
+	}
+	return results;
+}
+
+std::vector<std::string> BoyerMoore(const std::vector<std::string>& split_by_space, const std::vector<std::string>& files)
+{
+	std::vector<std::string> results;
+	results.reserve(files.size());
+	for (const std::string& str : split_by_space)
+	{
+		for (const std::string& file : files)
+		{
+			auto it = std::search(file.cbegin(), file.cend(), std::boyer_moore_horspool_searcher(str.begin(), str.end()));
+			if (it != file.end())
+			{
+				results.push_back(file);
+			}
+		}
+	}
 	return results;
 }
 
@@ -46,104 +81,148 @@ static std::string_view GetStringFunc(std::string_view string)
 	return string;
 }
 
-#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK(BENCHMARK_NAME)->Repetitions(5)
+#define FUZZY_SEARCH_BENCHMARK(BENCHMARK_NAME) BENCHMARK(BENCHMARK_NAME)->Repetitions(2)->Unit(benchmark::kMicrosecond)
 
 void BM_FuzzyLongPattern(benchmark::State& state)
 {
-	std::vector<std::string> original_files = {
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/CMakeLists.txt",
-	};
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
 
 	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("hierarchy node base", original_files.begin(), original_files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
+		    FuzzySearch::Search("qt base view list", files.begin(), files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		benchmark::DoNotOptimize(results);
 	}
 }
 FUZZY_SEARCH_BENCHMARK(BM_FuzzyLongPattern);
 
-void BM_FindLongPattern(benchmark::State& state)
-{
-	std::vector<std::string> original_files = {
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/CMakeLists.txt",
-	};
-
-	std::vector<std::string> split_by_space = {"hierarchy", "node", "base"};
-
-	for (const auto _ : state)
-	{
-		std::vector<std::string> results = NaiveSearch(split_by_space, original_files);
-		benchmark::DoNotOptimize(results);
-	}
-}
-FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
-
 void BM_FuzzyShortPattern(benchmark::State& state)
 {
-	std::vector<std::string> original_files = {
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/CMakeLists.txt",
-	};
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
 
 	for (const auto _ : state)
 	{
 		std::vector<FuzzySearch::SearchResult> results =
-		    FuzzySearch::Search("BASE", original_files.begin(), original_files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_FILENAMES);
+		    FuzzySearch::Search("TABLE", files.begin(), files.end(), &GetStringFunc, FuzzySearch::MatchMode::E_SOURCE_FILES);
 		benchmark::DoNotOptimize(results);
 	}
 }
 FUZZY_SEARCH_BENCHMARK(BM_FuzzyShortPattern);
 
-void BM_FindShortPattern(benchmark::State& state)
+void BM_BoyerMooreLongPattern(benchmark::State& state)
 {
-	std::vector<std::string> original_files = {
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseEntityNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNodeLoader.h",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseHierarchyNode.h",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.cpp",
-	    "e:/libs/nodehierarchy/main/source/BaseObjectNode.h",
-	    "e:/libs/nodehierarchy/main/source/CMakeLists.txt",
-	    "e:/libs/otherlib/main/source/CMakeLists.txt",
-	};
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
 
-	std::vector<std::string> split_by_space = {"BASE"};
+	std::vector<std::string> split_by_space = {"qt", "base", "view", "list"};
 
 	for (const auto _ : state)
 	{
-		std::vector<std::string> results = NaiveSearch(split_by_space, original_files);
+		std::vector<std::string> results = BoyerMoore(split_by_space, files);
+		benchmark::DoNotOptimize(results);
+	}
+}
+FUZZY_SEARCH_BENCHMARK(BM_BoyerMooreLongPattern);
+
+void BM_BoyerMooreShortPattern(benchmark::State& state)
+{
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
+
+	std::vector<std::string> split_by_space = {"TABLE"};
+
+	for (const auto _ : state)
+	{
+		std::vector<std::string> results = BoyerMoore(split_by_space, files);
+		benchmark::DoNotOptimize(results);
+	}
+}
+FUZZY_SEARCH_BENCHMARK(BM_BoyerMooreShortPattern);
+
+void BM_FindLongPattern(benchmark::State& state)
+{
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
+
+	std::vector<std::string> split_by_space = {"qt", "base", "view", "list"};
+
+	for (const auto _ : state)
+	{
+		std::vector<std::string> results = StringSearch(split_by_space, files);
+		benchmark::DoNotOptimize(results);
+	}
+}
+FUZZY_SEARCH_BENCHMARK(BM_FindLongPattern);
+
+void BM_FindShortPattern(benchmark::State& state)
+{
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
+
+	std::vector<std::string> split_by_space = {"TABLE"};
+
+	for (const auto _ : state)
+	{
+		std::vector<std::string> results = StringSearch(split_by_space, files);
 		benchmark::DoNotOptimize(results);
 	}
 }
 FUZZY_SEARCH_BENCHMARK(BM_FindShortPattern);
+
+void BM_RegexLongPattern(benchmark::State& state)
+{
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
+
+	std::vector<std::string> split_by_space = {"qt", "base", "view", "list"};
+
+	for (const auto _ : state)
+	{
+		std::vector<std::string> results = RegexSearch(split_by_space, files);
+		benchmark::DoNotOptimize(results);
+	}
+}
+FUZZY_SEARCH_BENCHMARK(BM_RegexLongPattern);
+
+void BM_RegexShortPattern(benchmark::State& state)
+{
+	std::vector<std::string> files;
+	for (const char* str : FuzzySearchBenchmark::FILES)
+	{
+		files.push_back(str);
+	}
+
+	std::vector<std::string> split_by_space = {"TABLE"};
+
+	for (const auto _ : state)
+	{
+		std::vector<std::string> results = RegexSearch(split_by_space, files);
+		benchmark::DoNotOptimize(results);
+	}
+}
+FUZZY_SEARCH_BENCHMARK(BM_RegexShortPattern);
 
 BENCHMARK_MAIN();

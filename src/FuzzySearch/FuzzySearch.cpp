@@ -253,7 +253,7 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 		{
 			pattern_index += best_match_length - 1;
 		}
-		else if(best_match_length == 0)
+		else if (best_match_length == 0)
 		{
 			++unmatched_characters_from_pattern;
 			// Allow some unmatched characters (typos etc...)
