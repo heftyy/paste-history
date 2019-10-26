@@ -19,7 +19,7 @@ before_install:
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
-  - ./vcpkg install protobuf gtest benchmark ms-gsl
+  - ./vcpkg install gtest benchmark ms-gsl
   - export VCPKG_ROOT=$(pwd)
   - cd ..
 before_script:
