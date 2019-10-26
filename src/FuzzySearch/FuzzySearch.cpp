@@ -189,6 +189,9 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 		{
 			out_match.m_Score += match.m_Score;
 			out_match.m_Matches.insert(out_match.m_Matches.end(), match.m_Matches.begin(), match.m_Matches.end());
+
+			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
+			pattern_index += static_cast<int>(match.m_Matches.size() - 1);
 		}
 	}
 
