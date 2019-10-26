@@ -21,6 +21,27 @@ struct PatternMatch
 	std::vector<int> m_Matches;
 };
 
+/*
+ * InputPattern struct contains small helper buffers to avoid reallocating inside FuzzyMatch.
+ * 
+ * If you are going to search for the same pattern in multiple different strings
+ * reuse the same instance of InputPattern for every search instead of recreating it.
+*/
+struct InputPattern
+{
+	explicit InputPattern(std::string_view pattern)
+	    : m_Pattern(pattern)
+	{
+		m_PatternMatches.resize(pattern.length());
+		m_MatchIndexes.resize(pattern.length());
+	}
+
+	std::string_view m_Pattern;
+
+	std::vector<PatternMatch> m_PatternMatches;
+	std::vector<int> m_MatchIndexes;
+};
+
 struct SearchResult
 {
 	std::string_view m_String;
@@ -34,17 +55,18 @@ enum class MatchMode
 	E_SOURCE_FILES
 };
 
-constexpr size_t max_pattern_length = 256;
+constexpr size_t max_pattern_length = 1024;
 
-PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode);
+PatternMatch FuzzyMatch(InputPattern& input_pattern, std::string_view str, MatchMode match_mode);
 
 bool SearchResultComparator(const SearchResult& lhs, const SearchResult& rhs) noexcept;
 
 template <typename Iterator, typename Func>
 std::vector<SearchResult> Search(std::string_view pattern, Iterator&& begin, Iterator&& end, Func&& get_string_func, MatchMode match_mode)
 {
-	static_assert(std::is_invocable_r<std::string_view, decltype(get_string_func), typename std::iterator_traits<Iterator>::value_type>::value,
-	              "get_string_func needs to be a pointer to function returning std::string_view");
+	static_assert(
+	    std::is_invocable_r<std::string_view, decltype(get_string_func), typename std::iterator_traits<Iterator>::value_type>::value,
+	    "get_string_func needs to be a pointer to function returning std::string_view");
 
 	if (pattern.empty())
 	{
@@ -56,17 +78,18 @@ std::vector<SearchResult> Search(std::string_view pattern, Iterator&& begin, Ite
 	}
 
 	std::vector<SearchResult> search_results;
-	search_results.reserve(std::distance(begin, end));
+	search_results.reserve(std::distance(begin, end) / 2);
 
-	std::for_each(begin, end, [pattern, &get_string_func, match_mode, &search_results](const auto& element) 
-	{
+	InputPattern input_pattern(pattern);
+
+	std::for_each(begin, end, [&input_pattern, &get_string_func, match_mode, &search_results](const auto& element) {
 		SearchResult search_result;
 		search_result.m_String = get_string_func(element);
-		search_result.m_PatternMatch = FuzzyMatch(pattern, search_result.m_String, match_mode);
+		search_result.m_PatternMatch = FuzzyMatch(input_pattern, search_result.m_String, match_mode);
 
 		if (search_result.m_PatternMatch.m_Score > 0)
 		{
-			search_results.push_back(std::move(search_result));
+			search_results.push_back(search_result);
 		}
 	});
 

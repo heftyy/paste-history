@@ -1,7 +1,6 @@
 #include "FuzzySearch.h"
 
 #include <gsl/gsl>
-#include <set>
 
 // #define USE_STD_LOWER
 #if defined(USE_STD_LOWER)
@@ -20,7 +19,7 @@ constexpr int leading_letter_penalty = -2;   // penalty applied for every letter
 constexpr int unmatched_letter_penalty = -1; // penalty for every letter that doesn't matter
 
 constexpr int max_leading_letter_penalty = -10;
-constexpr int max_unmatched_characters_from_pattern = 3;
+constexpr int max_unmatched_characters_from_pattern = 2;
 
 constexpr bool IsLower(char c) noexcept
 {
@@ -58,28 +57,36 @@ constexpr int ToUpper(int c) noexcept
 #endif
 }
 
-const std::set<std::string>& GetSourceExtensions()
+inline bool IsSourceFile(std::string_view str)
 {
-	static std::set<std::string> source_extensions = {".cpp", ".cs", ".c", ".java", ".py"};
-	return source_extensions;
-}
-
-bool IsSourceFile(std::string_view str)
-{
-	const size_t ext_len = str.rfind(".");
-	if (ext_len != std::string::npos)
+	if (str[str.length() - 4] == '.')
 	{
-		std::string ext(str, ext_len, str.length() - ext_len);
-		const std::set<std::string>& source_extensions = GetSourceExtensions();
-		return source_extensions.find(ext) != source_extensions.end();
+		const size_t extension_start = str.length() - 4;
+		if (std::strncmp(str.data() + extension_start, "cpp", 3))
+			return true;
 	}
+	else if (str[str.length() - 3] == '.')
+	{
+		const size_t extension_start = str.length() - 3;
+		if (std::strncmp(str.data() + extension_start, "py", 2))
+			return true;
+
+		if (std::strncmp(str.data() + extension_start, "cs", 2))
+			return true;
+	}
+	else if(str[str.length() - 2] == '.')
+	{
+		if (str[str.length() - 1] == 'c')
+			return true;
+	}
+
 	return false;
 }
 
 int CalculateSequentialMatchScore(std::string_view str, int filename_start_index, MatchMode match_mode, const gsl::span<int>& matches)
 {
 	int out_score = 5;
-	const int str_length = gsl::narrow_cast<int>(str.length());
+	const int str_length = static_cast<int>(str.length());
 
 	int matches_in_filename = 0;
 	int first_match_in_filename = -1;
@@ -109,7 +116,7 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 		if (curr_index >= filename_start_index)
 		{
 			// Save the first match in the filename
-			if (first_match_in_filename == max_pattern_length + 1)
+			if (first_match_in_filename == -1)
 			{
 				first_match_in_filename = curr_index;
 			}
@@ -139,7 +146,7 @@ int CalculateSequentialMatchScore(std::string_view str, int filename_start_index
 	out_score += std::min(unmatched_letter_penalty * unmatched, 0);
 
 	// Apply sequential match bonus
-	out_score += sequential_bonus * (gsl::narrow_cast<int>(matches.size()) - 1);
+	out_score += sequential_bonus * (static_cast<int>(matches.size()) - 1);
 
 	return out_score;
 }
@@ -152,8 +159,8 @@ inline int FindSequentialMatch(std::string_view pattern, int pattern_index, std:
 		return 0;
 	}
 
-	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
-	const int str_length = gsl::narrow_cast<int>(str.length());
+	const int pattern_length = static_cast<int>(pattern.length());
+	const int str_length = static_cast<int>(str.length());
 
 	int matched_chars = 0;
 	while (ToLower(pattern[pattern_index + matched_chars]) == ToLower(str[str_index + matched_chars]))
@@ -173,7 +180,7 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 	PatternMatch out_match;
 	out_match.m_Matches.reserve(pattern.length());
 
-	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
+	const int pattern_length = static_cast<int>(pattern.length());
 
 	for (int pattern_index = 0; pattern_index < pattern_length; ++pattern_index)
 	{
@@ -182,29 +189,28 @@ PatternMatch CalculatePatternScore(std::string_view pattern, const gsl::span<Pat
 		{
 			out_match.m_Score += match.m_Score;
 			out_match.m_Matches.insert(out_match.m_Matches.end(), match.m_Matches.begin(), match.m_Matches.end());
-
-			// Advance the pattern_index by the match length, m_Score is only set for the first character of a match
-			pattern_index += gsl::narrow_cast<int>(match.m_Matches.size() - 1);
 		}
 	}
 
 	return out_match;
 }
 
-PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMode match_mode)
+PatternMatch FuzzyMatch(InputPattern& input_pattern, std::string_view str, MatchMode match_mode)
 {
-	const int pattern_length = gsl::narrow_cast<int>(pattern.length());
-	const int str_length = gsl::narrow_cast<int>(str.length());
+	std::string_view pattern = input_pattern.m_Pattern;
 
-	std::vector<PatternMatch> pattern_matches(pattern_length);
-	std::vector<int> match_indexes(pattern_length);
+	const int pattern_length = static_cast<int>(pattern.length());
+	const int str_length = static_cast<int>(str.length());
+
+	std::vector<PatternMatch>& pattern_matches = input_pattern.m_PatternMatches;
+	std::vector<int>& match_indexes = input_pattern.m_MatchIndexes;
 
 	int last_path_separator_index = 0;
 	if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)
 	{
-		last_path_separator_index = gsl::narrow_cast<int>(str.find_last_of("\\/"));
+		last_path_separator_index = static_cast<int>(str.find_last_of("\\/"));
 	}
-	
+
 	int str_start = 0;
 	int unmatched_characters_from_pattern = 0;
 
@@ -242,7 +248,8 @@ PatternMatch FuzzyMatch(std::string_view pattern, std::string_view str, MatchMod
 					match.m_Score = match_score;
 					match.m_Matches.assign(match_indexes.begin(), match_indexes.begin() + best_match_length);
 
-					// Skip searching for matches in str that we already used in our currect best match, doing this to improve performance
+					// Skip searching for matches in str that we already used in our currect best match, doing this to
+					// improve performance
 					str_index += best_match_length;
 					str_start = str_index;
 				}

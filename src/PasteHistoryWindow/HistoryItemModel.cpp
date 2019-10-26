@@ -15,10 +15,14 @@ std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const st
 	std::vector<FuzzySearch::SearchResult> search_results;
 	search_results.reserve(history_items.size());
 
+	FuzzySearch::InputPattern input_pattern(filter_pattern);
+
 	for (size_t history_item_index = 0; history_item_index < history_items.size(); ++history_item_index)
 	{
 		const HistoryItemData& history_item_data = history_items[history_item_index].m_HistoryItemData;
-		FuzzySearch::PatternMatch pattern_match = FuzzySearch::FuzzyMatch(filter_pattern, history_item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS);
+		FuzzySearch::PatternMatch pattern_match =
+		    FuzzySearch::FuzzyMatch(input_pattern, history_item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS);
+
 		search_results.push_back({history_item_data.m_Text, pattern_match});
 		if (pattern_match.m_Score > 0)
 		{
@@ -26,8 +30,7 @@ std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const st
 		}
 	}
 
-	std::sort(filter_proxy_mapping.begin(), filter_proxy_mapping.end(), [&search_results](size_t lhs, size_t rhs) 
-	{
+	std::sort(filter_proxy_mapping.begin(), filter_proxy_mapping.end(), [&search_results](size_t lhs, size_t rhs) {
 		return FuzzySearch::SearchResultComparator(search_results[lhs], search_results[rhs]);
 	});
 
@@ -206,8 +209,9 @@ void HistoryItemModel::UpdateTimestampForHistoryItem(HistoryItemData& history_it
 {
 	HistoryItemData& data_by_text_hash = history_item_data;
 	data_by_text_hash.m_Timestamp = timestamp;
-	std::sort(m_HistoryItems.begin(), m_HistoryItems.end(),
-	          [](const HistoryItem& lhs, const HistoryItem& rhs) { return lhs.m_HistoryItemData.m_Timestamp <= rhs.m_HistoryItemData.m_Timestamp; });
+	std::sort(m_HistoryItems.begin(), m_HistoryItems.end(), [](const HistoryItem& lhs, const HistoryItem& rhs) {
+		return lhs.m_HistoryItemData.m_Timestamp <= rhs.m_HistoryItemData.m_Timestamp;
+	});
 
 	for (size_t index = 0; index < m_HistoryItems.size(); ++index)
 	{
