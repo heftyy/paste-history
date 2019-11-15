@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QStyledItemDelegate>
 #include <QFont>
+#include <QStyledItemDelegate>
 
 class HistoryItemDelegate : public QStyledItemDelegate
 {

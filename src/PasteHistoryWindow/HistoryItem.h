@@ -23,4 +23,5 @@ struct HistoryItem
 
 	HistoryItemData m_HistoryItemData;
 	QString m_DisplayText;
+	FuzzySearch::PatternMatch m_Match;
 };

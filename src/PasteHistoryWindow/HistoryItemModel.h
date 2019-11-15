@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include <QSortFilterProxyModel>
 
@@ -22,9 +22,10 @@ public:
 	//!< Updates the filter pattern and might force a filter and resort, returns true if proxy model changed
 	bool UpdateFilterPattern(const QString& pattern);
 	void AddToHistory(HistoryItemData history_item_data);
-	void AddToHistory(const std::vector<HistoryItemData>& history_items_data);	
+	void AddToHistory(const std::vector<HistoryItemData>& history_items_data);
 
 	const HistoryItemData& GetHistoryItemData(int index) const;
+	const HistoryItemData& GetHistoryItemData(QModelIndex index) const;
 	void Clear();
 
 private:

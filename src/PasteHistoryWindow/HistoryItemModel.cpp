@@ -7,7 +7,7 @@
 #include "HistoryItem.h"
 #include "HistoryViewConstants.h"
 
-std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const std::vector<HistoryItem>& history_items)
+std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, std::vector<HistoryItem>& history_items)
 {
 	std::vector<size_t> filter_proxy_mapping;
 	filter_proxy_mapping.reserve(history_items.size());
@@ -19,7 +19,7 @@ std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const st
 
 	for (size_t history_item_index = 0; history_item_index < history_items.size(); ++history_item_index)
 	{
-		const HistoryItemData& history_item_data = history_items[history_item_index].m_HistoryItemData;
+		HistoryItemData& history_item_data = history_items[history_item_index].m_HistoryItemData;
 		FuzzySearch::PatternMatch pattern_match =
 		    FuzzySearch::FuzzyMatch(input_pattern, history_item_data.m_Text, FuzzySearch::MatchMode::E_STRINGS);
 
@@ -27,6 +27,7 @@ std::vector<size_t> BuildFilterMapping(std::string_view filter_pattern, const st
 		if (pattern_match.m_Score > 0)
 		{
 			filter_proxy_mapping.push_back(history_item_index);
+			history_items[history_item_index].m_Match = pattern_match;
 		}
 	}
 
@@ -45,15 +46,33 @@ HistoryItemModel::HistoryItemModel(QObject* parent)
 
 QVariant HistoryItemModel::data(const QModelIndex& index, int role) const
 {
+	QVariant result;
+
+	int source_index = MapToSource(index);
+	if (source_index < 0 || source_index >= static_cast<int>(m_HistoryItems.size()))
+		return result;
+
 	if (role == Qt::DisplayRole)
 	{
-		int source_index = MapToSource(index);
-		if (source_index >= 0 && source_index < gsl::narrow_cast<int>(m_HistoryItems.size()))
+		result.setValue(m_HistoryItems[source_index].m_DisplayText);
+	}
+	else if (role == Qt::ToolTipRole)
+	{
+		result.setValue(QString::fromStdString(m_HistoryItems[source_index].m_HistoryItemData.m_Text));
+	}
+	else if (role == HistoryViewConstants::HISTORY_ITEM_FILTER_MATCH)
+	{
+		if (IsFilterEnabled())
 		{
-			return m_HistoryItems[source_index].m_DisplayText;
+			result.setValue(m_HistoryItems[source_index].m_Match);
+		}
+		else
+		{
+			result.setValue(FuzzySearch::PatternMatch());
 		}
 	}
-	return QVariant();
+
+	return result;
 }
 
 int HistoryItemModel::rowCount(const QModelIndex& parent) const
@@ -97,7 +116,7 @@ QModelIndex HistoryItemModel::parent(const QModelIndex&) const
 
 bool HistoryItemModel::UpdateFilterPattern(const QString& pattern)
 {
-	std::string pattern_str = pattern.toStdString();
+	std::string pattern_str = pattern.trimmed().toStdString();
 	if (m_FilterPattern == pattern_str)
 		return false;
 
@@ -132,7 +151,12 @@ void HistoryItemModel::AddToHistory(const std::vector<HistoryItemData>& history_
 
 const HistoryItemData& HistoryItemModel::GetHistoryItemData(int index) const
 {
-	int source_index = MapToSource(createIndex(index, 0));
+	return GetHistoryItemData(createIndex(index, 0));
+}
+
+const HistoryItemData& HistoryItemModel::GetHistoryItemData(QModelIndex index) const
+{
+	int source_index = MapToSource(index);
 	return m_HistoryItems[source_index].m_HistoryItemData;
 }
 
@@ -189,10 +213,11 @@ void HistoryItemModel::AddNewHistoryItem(const HistoryItemData& history_item_dat
 
 	size_t insert_at_index = std::distance(m_HistoryItems.begin(), timestamp_found);
 	Ensures(insert_at_index <= m_HistoryItems.size());
-	int proxy_index = gsl::narrow<int>(m_HistoryItems.size() - insert_at_index);
 
 	if (!IsFilterEnabled())
 	{
+		const int proxy_index = static_cast<int>(m_HistoryItems.size() - insert_at_index);
+
 		beginInsertRows(QModelIndex(), proxy_index, proxy_index);
 		m_HistoryItems.emplace(m_HistoryItems.begin() + insert_at_index, history_item_data);
 		m_TextHashToTimestampIndex[history_item_data.m_TextHash] = insert_at_index;
@@ -207,8 +232,7 @@ void HistoryItemModel::AddNewHistoryItem(const HistoryItemData& history_item_dat
 
 void HistoryItemModel::UpdateTimestampForHistoryItem(HistoryItemData& history_item_data, size_t timestamp)
 {
-	HistoryItemData& data_by_text_hash = history_item_data;
-	data_by_text_hash.m_Timestamp = timestamp;
+	history_item_data.m_Timestamp = timestamp;
 	std::sort(m_HistoryItems.begin(), m_HistoryItems.end(), [](const HistoryItem& lhs, const HistoryItem& rhs) {
 		return lhs.m_HistoryItemData.m_Timestamp <= rhs.m_HistoryItemData.m_Timestamp;
 	});

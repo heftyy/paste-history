@@ -12,6 +12,8 @@ public:
 	void AddToHistory(const std::string& text, size_t timestamp);
 	bool IsShortutKey(const QKeyEvent* key_event);
 
+	bool viewportEvent(QEvent* event) override;
+
 public Q_SLOTS:
 	void UpdateFilterPattern(QString pattern);
 
@@ -20,4 +22,5 @@ protected:
 
 private:
 	class HistoryItemModel* m_HistoryItemModel;
+	class HistoryItemDelegate* m_HistoryItemDelegate;
 };

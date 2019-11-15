@@ -28,7 +28,7 @@ static std::string_view GetStringFunc(const StringWithScore& obj)
 	return obj.m_String;
 }
 
-#define HISTORY_MODEL_BENCHMARK(BENCHMARK_NAME) BENCHMARK(BENCHMARK_NAME)->Range(8, 8 << 10);
+#define HISTORY_MODEL_BENCHMARK(BENCHMARK_NAME) BENCHMARK(BENCHMARK_NAME)->Range(8, 8 << 10)->Unit(benchmark::kMicrosecond);
 
 void BM_ModelInsert(benchmark::State& state)
 {

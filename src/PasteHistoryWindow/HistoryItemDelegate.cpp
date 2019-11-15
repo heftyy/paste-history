@@ -6,11 +6,80 @@
 #include <QStyleOptionViewItem>
 
 #include "HistoryViewConstants.h"
+#include <FuzzySearch.h>
+
+#include <QPainter>
+#include <QStyleOptionViewItem>
+
+static void DrawFragment(QPainter* painter, const QFont& font, QString label, QRect& rect, int& current_width, int text_flags, int from,
+                         int to)
+{
+	if (from == to)
+		return;
+
+	// Wrap text manually
+	bool wrap_text = text_flags & Qt::TextWrapAnywhere;
+	text_flags &= ~Qt::TextWrapAnywhere;
+
+	painter->setFont(font);
+	QRect rect_copy = rect;
+
+	const int end_char = to == -1 ? label.size() : to;
+	const int len = end_char - from;
+	if (from > label.size() || len < 0 || len > (label.size() - from))
+		return;
+
+	QStringRef fragment(&label, from, len);
+
+	for (QChar character : fragment)
+	{
+		int width = painter->fontMetrics().width(character);
+
+		if (wrap_text && current_width + width >= rect.width())
+		{
+			current_width = 0;
+			rect.setTop(rect.top() + painter->fontMetrics().height());
+			rect_copy.setTop(rect.top());
+
+			rect.setBottom(rect.bottom() + painter->fontMetrics().height());
+			rect_copy.setBottom(rect.bottom());
+		}
+
+		rect_copy.setLeft(rect.left() + current_width);
+		painter->drawText(rect_copy, text_flags, character);
+
+		current_width += width;
+	}
+}
+
+static void DrawLabelWithHighlightedMatch(QPainter* painter, const QString& label, const QFont& font, int text_flags, QRect rect,
+                                          const std::vector<int>& matches)
+{
+	QFont bold_font = font;
+	bold_font.setWeight(QFont::ExtraBold);
+	int fragment_start = 0;
+	int fragment_end = 0;
+	int current_width = 0;
+	for (int i = 0; i < matches.size(); ++i)
+	{
+		int match = matches[i];
+
+		if (match > fragment_end)
+		{
+			DrawFragment(painter, bold_font, label, rect, current_width, text_flags, fragment_start, fragment_end);
+			DrawFragment(painter, font, label, rect, current_width, text_flags, fragment_end, match);
+			fragment_start = match;
+		}
+		fragment_end = match + 1;
+	}
+	DrawFragment(painter, bold_font, label, rect, current_width, text_flags, fragment_start, fragment_end);
+	DrawFragment(painter, font, label, rect, current_width, text_flags, fragment_end, -1);
+}
 
 HistoryItemDelegate::HistoryItemDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
-	m_Font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	m_Font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
 
 	const QFontMetrics fixed_font_metrics(m_Font);
 	m_CharacterSize = QSize(fixed_font_metrics.averageCharWidth(), fixed_font_metrics.height());
@@ -18,7 +87,6 @@ HistoryItemDelegate::HistoryItemDelegate(QObject* parent)
 
 void HistoryItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-	// initStyleOption(&option, index);
 	painter->save();
 
 	const QStyle* style = option.widget ? option.widget->style() : QApplication::style();
@@ -35,30 +103,15 @@ void HistoryItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
 	const QRect number_rect(0, rect.top(), number_text_width, rect.height());
 	const QRect text_rect(number_text_width, rect.top(), rect.width() - number_text_width, rect.height());
-	style->drawItemText(painter, number_rect, Qt::AlignHCenter | Qt::AlignVCenter, option.palette, true, number, QPalette::Dark);
-	style->drawItemText(painter, text_rect, Qt::AlignLeft | Qt::AlignVCenter, option.palette, true, text, QPalette::Light);
+	painter->setPen(Qt::darkGray);
+	painter->drawText(number_rect, Qt::AlignHCenter | Qt::AlignVCenter, number);
 
-	/*
-	QRect rect = option.rect;
-	QPalette::ColorGroup cg = option.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
-	if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
-	    cg = QPalette::Inactive;
+	QVariant matches_variant = index.data(HistoryViewConstants::HISTORY_ITEM_FILTER_MATCH);
+	FuzzySearch::PatternMatch pattern_match = matches_variant.value<FuzzySearch::PatternMatch>();
 
-	// set pen color
-	if (option.state & QStyle::State_Selected)
-	    painter->setPen(option.palette.color(cg, QPalette::HighlightedText));
-	else
-	    painter->setPen(option.palette.color(cg, QPalette::Text));
+	painter->setPen(Qt::lightGray);
+	DrawLabelWithHighlightedMatch(painter, text, m_Font, Qt::AlignLeft | Qt::AlignVCenter, text_rect, pattern_match.m_Matches);
 
-	const int number_text_width = 20;
-
-	QString text = index.model()->data(index, Qt::DisplayRole).toString();
-	painter->setRenderHint(QPainter::Antialiasing, true);
-	painter->setPen(HistoryItemDelegateInternals::NUMBER_COLOR);
-	painter->drawText(QRect(0, rect.top(), number_text_width, rect.height()), Qt::AlignHCenter | Qt::AlignVCenter, QString("%0.").arg(index.row() + 1));
-	painter->setPen(HistoryItemDelegateInternals::TEXT_COLOR);
-	painter->drawText(QRect(number_text_width, rect.top(), rect.width() - number_text_width, rect.height()), Qt::AlignLeft | Qt::AlignVCenter, text);
-	*/
 	painter->restore();
 }
 

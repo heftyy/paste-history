@@ -1,7 +1,5 @@
 #include "HistoryItem.h"
 
-#include <gsl/gsl>
-
 #include "HistoryViewConstants.h"
 
 HistoryItem::HistoryItem(HistoryItemData item_data)
@@ -16,7 +14,7 @@ HistoryItem::HistoryItem(HistoryItemData item_data)
 		{
 			replace_from_index = new_line_index;
 		}
-		const int removed_characters_count = gsl::narrow_cast<int>(m_HistoryItemData.m_Text.length()) - replace_from_index;
+		const int removed_characters_count = static_cast<int>(m_HistoryItemData.m_Text.length()) - replace_from_index;
 		m_DisplayText.replace(replace_from_index, removed_characters_count, "...");
 	}
 }
