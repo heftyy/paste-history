@@ -33,7 +33,7 @@ static void DrawFragment(QPainter* painter, const QFont& font, QString label, QR
 
 	for (QChar character : fragment)
 	{
-		int width = painter->fontMetrics().width(character);
+		int width = painter->fontMetrics().horizontalAdvance(character);
 
 		if (wrap_text && current_width + width >= rect.width())
 		{

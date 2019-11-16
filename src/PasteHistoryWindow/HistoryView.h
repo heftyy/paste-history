@@ -23,4 +23,5 @@ protected:
 private:
 	class HistoryItemModel* m_HistoryItemModel;
 	class HistoryItemDelegate* m_HistoryItemDelegate;
+	class HistoryToolTip* m_ToolTip;
 };

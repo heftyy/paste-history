@@ -9,6 +9,7 @@
 
 #include "HistoryItemDelegate.h"
 #include "HistoryItemModel.h"
+#include "HistoryToolTip.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 #include <QAbstractItemModelTester>
@@ -31,6 +32,9 @@ HistoryView::HistoryView(QWidget* parent)
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	installEventFilter(this);
+
+	m_ToolTip = new HistoryToolTip(this);
+	m_ToolTip->hide();
 }
 
 void HistoryView::AddToHistory(const std::string& text, size_t timestamp)
@@ -63,38 +67,23 @@ bool HistoryView::viewportEvent(QEvent* event)
 		{
 			const QRect item_rect = visualRect(index_at_pos);
 
-			QString tooltip_text = m_HistoryItemModel->data(index_at_pos, Qt::ToolTipRole).toString();
-			tooltip_text = tooltip_text.replace("\t", "").split(" ", QString::SplitBehavior::SkipEmptyParts).join(" ");
+			const QPoint left = mapToGlobal(item_rect.topLeft());
+			const QPoint right = mapToGlobal(item_rect.topRight());
 
-			//! 16 is the hardcoded offset in QToolTip::showText :(
-			const QPoint global_tooltip_pos = mapToGlobal(item_rect.topRight()) - QPoint(0, 15);
-
-			const QPoint global_cursor_pos = mapToGlobal(help_event->pos());
-			const QRect current_screen_rect = QGuiApplication::screenAt(global_cursor_pos)->availableGeometry();
-
-			const QFontMetrics font_metrics(QToolTip::font());
-			const QRect tooltip_rect = QRect(QPoint(0, 0), font_metrics.size(Qt::TextExpandTabs, tooltip_text, 16));
-
-			const bool toolip_fits = current_screen_rect.contains(tooltip_rect.translated(global_tooltip_pos));
-			QPoint offset(0, 0);
-			if (!toolip_fits)
-			{
-				const QRect main_window_geometry = topLevelWidget()->geometry();
-
-				const int main_window_offset = global_tooltip_pos.x() - main_window_geometry.left();
-				//! 7 seems to be the tooltip margins and i don't know how to find the real value
-				offset = -QPoint(main_window_offset + tooltip_rect.width() + 7, 0);
-			}
-
-			QToolTip::showText(global_tooltip_pos + offset, tooltip_text);
+			m_ToolTip->SetupToolTip(m_HistoryItemModel->data(index_at_pos, Qt::ToolTipRole).toString(), left, right);
+			m_ToolTip->show();
 		}
 		else
 		{
-			QToolTip::hideText();
+			m_ToolTip->hide();
 			event->ignore();
 		}
 
 		return true;
+	}
+	else if (event->type() == QEvent::Leave || event->type() == QEvent::FocusOut || event->type() == QEvent::Hide)
+	{
+		m_ToolTip->hide();
 	}
 	return QListView::viewportEvent(event);
 }
