@@ -70,7 +70,7 @@ bool HistoryView::viewportEvent(QEvent* event)
 			const QPoint left = mapToGlobal(item_rect.topLeft());
 			const QPoint right = mapToGlobal(item_rect.topRight());
 
-			m_ToolTip->SetupToolTip(m_HistoryItemModel->data(index_at_pos, Qt::ToolTipRole).toString(), left, right);
+			m_ToolTip->SetupToolTip(m_HistoryItemModel->GetHistoryItemData(index_at_pos).m_Text, left, right);
 			m_ToolTip->show();
 		}
 		else

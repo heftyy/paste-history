@@ -1,7 +1,8 @@
 #pragma once
 
+#include <string_view>
+
 #include <QPoint>
-#include <QString>
 #include <QWidget>
 
 class HistoryToolTip : public QWidget
@@ -15,7 +16,7 @@ public:
 		setWindowFlags(Qt::ToolTip);
 	}
 
-	void SetupToolTip(QString tooltip_text, QPoint left, QPoint right);
+	void SetupToolTip(std::string_view, QPoint left, QPoint right);
 	void paintEvent(QPaintEvent* event) override;
 
 private:
