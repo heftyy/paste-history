@@ -1,0 +1,22 @@
+QWidget {
+    color: #eff0f1;
+    background-color: #31363b;
+    selection-background-color: #3daee9;
+    selection-color: #eff0f1;
+    background-clip: border;
+    border-image: none;
+    border: 0px transparent black;
+    outline: 0;
+}
+
+HistoryToolTip {
+	background-color: #ff0000;
+	border: 1px solid #1976D2;
+	color: yellow;
+}
+
+HistoryView, QLineEdit {
+	border: 1px solid #0277BD;
+	background-color: #262626;
+	border-radius: 3px;
+}

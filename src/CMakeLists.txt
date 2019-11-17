@@ -29,6 +29,7 @@ IF(WIN32) # Check if we are on Windows
 	if(MSVC) # Check if we are using the Visual Studio compiler
 		set_target_properties(paste_history PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
 		set_target_properties(paste_history PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS /DEBUG:FASTLINK")
+		set_target_properties(paste_history PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 	else()
 		message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC)")
 	endif()

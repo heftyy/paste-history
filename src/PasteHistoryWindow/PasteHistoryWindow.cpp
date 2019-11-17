@@ -1,3 +1,4 @@
+
 #include "PasteHistoryWindow.h"
 
 #include <chrono>

@@ -7,7 +7,7 @@
       "buildRoot": "${projectDir}\\build\\Debug\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
-      "inheritEnvironments": [ "msvc_x64" ],
+      "inheritEnvironments": [ "msvc_x64" ], 
       "variables": []
     },
     {
