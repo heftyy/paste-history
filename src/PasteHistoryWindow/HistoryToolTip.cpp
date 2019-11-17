@@ -6,7 +6,9 @@
 #include <QStylePainter>
 #include <QToolTip>
 
-constexpr int HISTORY_TOOLTIP_MARGIN = 4;
+constexpr int HISTORY_TOOLTIP_MARGIN = 3;
+constexpr int HISTORY_TOOLTIP_X_OFFSET = 3;
+constexpr int HISTORY_TOOLTIP_Y_OFFSET = 3;
 
 void HistoryToolTip::SetupToolTip(QString tooltip_text, QPoint left, QPoint right)
 {
@@ -23,14 +25,14 @@ void HistoryToolTip::SetupToolTip(QString tooltip_text, QPoint left, QPoint righ
 	{
 		m_ToolTipRect = QRect(right, tooltip_rect.size());
 		m_ToolTipRect.adjust(-HISTORY_TOOLTIP_MARGIN, -HISTORY_TOOLTIP_MARGIN, HISTORY_TOOLTIP_MARGIN, HISTORY_TOOLTIP_MARGIN);
-		m_ToolTipRect.translate(HISTORY_TOOLTIP_MARGIN + 1, HISTORY_TOOLTIP_MARGIN);
+		m_ToolTipRect.translate(HISTORY_TOOLTIP_MARGIN + HISTORY_TOOLTIP_X_OFFSET, HISTORY_TOOLTIP_MARGIN + HISTORY_TOOLTIP_Y_OFFSET);
 	}
 	else
 	{
 		const QPoint tooltip_pos = left - QPoint(tooltip_rect.width(), 0);
 		m_ToolTipRect = QRect(tooltip_pos, tooltip_rect.size());
 		m_ToolTipRect.adjust(-HISTORY_TOOLTIP_MARGIN, -HISTORY_TOOLTIP_MARGIN, HISTORY_TOOLTIP_MARGIN, HISTORY_TOOLTIP_MARGIN);
-		m_ToolTipRect.translate(-HISTORY_TOOLTIP_MARGIN - 1, HISTORY_TOOLTIP_MARGIN + 1);
+		m_ToolTipRect.translate(-HISTORY_TOOLTIP_MARGIN - HISTORY_TOOLTIP_X_OFFSET, HISTORY_TOOLTIP_MARGIN + HISTORY_TOOLTIP_Y_OFFSET);
 	}
 
 	setGeometry(m_ToolTipRect);
@@ -47,8 +49,6 @@ void HistoryToolTip::paintEvent(QPaintEvent* /*event*/)
 	painter.setFont(QToolTip::font());
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
 
-	style()->drawItemText(&painter, text_rect, Qt::AlignLeft | Qt::AlignVCenter, option.palette(), true, m_ToolTipText);
-
-	// const QRect text_rect(QRect(QPoint(HISTORY_TOOLTIP_MARGIN, 0), m_ToolTipRect.size()));
-	// painter.drawText(text_rect, Qt::AlignLeft | Qt::AlignVCenter, m_ToolTipText);
+	const QRect text_rect(QRect(QPoint(HISTORY_TOOLTIP_MARGIN, 0), m_ToolTipRect.size()));
+	style()->drawItemText(&painter, text_rect, Qt::AlignLeft | Qt::AlignVCenter, option.palette, true, m_ToolTipText);
 }

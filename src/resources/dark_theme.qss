@@ -1,6 +1,6 @@
 QWidget {
     color: #eff0f1;
-    background-color: #31363b;
+    background-color: #303030;
     selection-background-color: #3daee9;
     selection-color: #eff0f1;
     background-clip: border;
@@ -10,13 +10,26 @@ QWidget {
 }
 
 HistoryToolTip {
-	background-color: #ff0000;
-	border: 1px solid #1976D2;
-	color: yellow;
+	background-color: #262626;
+	border: 1px solid #616161;
+	color: #eff0f1;
+}
+
+PasteHistoryWindow {
+	padding: 10px;
+	margin: 10px;
 }
 
 HistoryView, QLineEdit {
 	border: 1px solid #0277BD;
 	background-color: #262626;
 	border-radius: 3px;
+}
+
+HistoryView {
+	padding: 2px;
+}
+
+QLineEdit {
+	padding: 5px;
 }

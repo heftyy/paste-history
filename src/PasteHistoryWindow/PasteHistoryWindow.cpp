@@ -47,15 +47,8 @@ void PasteHistoryWindow::Start()
 	m_HistoryView->AddToHistory("blam105", 105);
 }
 
-void PasteHistoryWindow::showEvent(QShowEvent* event)
+bool PasteHistoryWindow::eventFilter(QObject* /*obj*/, QEvent* event)
 {
-	Q_UNUSED(event);
-	m_LineEdit->setFocus();
-}
-
-bool PasteHistoryWindow::eventFilter(QObject* obj, QEvent* event)
-{
-	Q_UNUSED(obj);
 	if (const QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event))
 	{
 		if (m_HistoryView->IsShortutKey(key_event))
