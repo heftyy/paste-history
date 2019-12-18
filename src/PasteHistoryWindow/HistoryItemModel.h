@@ -29,13 +29,6 @@ public:
 	void Clear();
 
 private:
-	std::string m_FilterPattern;
-	std::vector<HistoryItem> m_HistoryItems;
-	std::vector<size_t> m_FilterProxyMapping;
-	std::unordered_map<size_t, size_t> m_TextHashToTimestampIndex;
-
-	bool m_IsFilteringEnabled = false;
-
 	bool IsFilterEnabled() const;
 	void Invalidate();
 
@@ -45,4 +38,11 @@ private:
 	void AddNewHistoryItem(const HistoryItemData& history_item_data);
 	//! The item already existed in history, replace our timestamp in the model with the new one
 	void UpdateTimestampForHistoryItem(HistoryItemData& history_item, size_t timestamp);
+
+	std::string m_FilterPattern;
+	std::vector<HistoryItem> m_HistoryItems;
+	std::vector<size_t> m_FilterProxyMapping;
+	std::unordered_map<size_t, size_t> m_TextHashToTimestampIndex;
+
+	bool m_IsFilteringEnabled = false;
 };

@@ -3,16 +3,16 @@
 #include <string>
 #include <vector>
 
-#include <QString>
 #include <QMetaType>
+#include <QString>
 
 #include <FuzzySearch.h>
 
 struct HistoryItemData
 {
 	std::string m_Text;
-	size_t m_TextHash;
-	size_t m_Timestamp;
+	size_t m_TextHash{0};
+	size_t m_Timestamp{0};
 };
 
 Q_DECLARE_METATYPE(HistoryItemData)

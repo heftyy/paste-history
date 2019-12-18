@@ -5,6 +5,7 @@
 #include <QStyleOption>
 #include <QStylePainter>
 #include <QToolTip>
+#include <QPoint>
 
 #include <algorithm>
 #include <limits>
@@ -47,11 +48,18 @@ QString RemoveLeadingIndentationFromString(std::string_view tooltip_text)
 	return result;
 }
 
+HistoryToolTip::HistoryToolTip(QWidget* parent)
+    : QWidget(parent)
+{
+	setWindowFlags(Qt::ToolTip);
+	m_Font = QToolTip::font();
+}
+
 void HistoryToolTip::SetupToolTip(std::string_view tooltip_text, QPoint left, QPoint right)
 {
 	m_ToolTipText = RemoveLeadingIndentationFromString(tooltip_text);
 
-	const QFontMetrics font_metrics(QToolTip::font());
+	const QFontMetrics font_metrics(m_Font);
 	const QSize tooltip_size = font_metrics.size(Qt::TextExpandTabs, m_ToolTipText);
 
 	const QRect current_screen_rect = QGuiApplication::screenAt(right)->availableGeometry();
@@ -84,7 +92,7 @@ void HistoryToolTip::paintEvent(QPaintEvent* /*event*/)
 	QPainter painter(this);
 
 	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setFont(QToolTip::font());
+	painter.setFont(m_Font);
 	style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
 
 	const QRect text_rect(QRect(QPoint(HISTORY_TOOLTIP_MARGIN, 0), m_ToolTipRect.size()));

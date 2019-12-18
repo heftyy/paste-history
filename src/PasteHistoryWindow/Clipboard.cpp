@@ -19,7 +19,7 @@ Clipboard::Clipboard(QObject* parent)
 	connect(clipboard, &QClipboard::dataChanged, this, &Clipboard::OnClipboardChanged);
 
 	m_DelayTimer = new QTimer(this);
-	m_DelayTimer->setInterval(10);
+	m_DelayTimer->setInterval(25);
 	m_DelayTimer->setSingleShot(true);
 	connect(m_DelayTimer, &QTimer::timeout, this, &Clipboard::RetrieveClipboardData);
 }

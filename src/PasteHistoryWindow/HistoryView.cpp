@@ -76,21 +76,36 @@ bool HistoryView::viewportEvent(QEvent* event)
 		else
 		{
 			m_ToolTip->hide();
-			event->ignore();
 		}
 
+		event->accept();
 		return true;
 	}
 	else if (event->type() == QEvent::Leave || event->type() == QEvent::FocusOut || event->type() == QEvent::Hide)
 	{
 		m_ToolTip->hide();
 	}
-	return QListView::viewportEvent(event);
+	return QListView::viewportEvent(event); 
+}
+
+void HistoryView::showEvent(QShowEvent* event)
+{
+	SelectTopRow();
+	return QListView::showEvent(event);
+}
+
+void HistoryView::SelectTopRow()
+{
+	if (model()->rowCount() > 0)
+	{
+		selectionModel()->setCurrentIndex(model()->index(0, 0), QItemSelectionModel::ClearAndSelect);
+	}
 }
 
 void HistoryView::UpdateFilterPattern(QString pattern)
 {
 	m_HistoryItemModel->UpdateFilterPattern(pattern);
+	SelectTopRow();
 }
 
 QSize HistoryView::sizeHint() const

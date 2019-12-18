@@ -4,13 +4,13 @@
 #include <chrono>
 
 #include <QApplication>
+#include <QDebug>
 #include <QKeyEvent>
 #include <QLayout>
 #include <QLineEdit>
-#include <QDebug>
 
-#include "HistoryView.h"
 #include "Clipboard.h"
+#include "HistoryView.h"
 
 PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
     : QDialog(parent)
@@ -32,6 +32,7 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	m_Clipboard = new Clipboard(this);
 	connect(m_Clipboard, &Clipboard::DataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
 	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);
+	connect(m_HistoryView, &HistoryView::activated, this, &PasteHistoryWindow::OnPasteRequested);
 }
 
 void PasteHistoryWindow::Start()
@@ -40,11 +41,10 @@ void PasteHistoryWindow::Start()
 	m_HistoryView->AddToHistory("blam2", 2);
 	m_HistoryView->AddToHistory("blam5", 5);
 	m_HistoryView->AddToHistory("blam78", 78);
-
-	show();
-
 	m_HistoryView->AddToHistory("blam3", 3);
 	m_HistoryView->AddToHistory("blam105", 105);
+
+	show();
 }
 
 bool PasteHistoryWindow::eventFilter(QObject* /*obj*/, QEvent* event)
@@ -54,6 +54,11 @@ bool PasteHistoryWindow::eventFilter(QObject* /*obj*/, QEvent* event)
 		if (m_HistoryView->IsShortutKey(key_event))
 		{
 			qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
+			return true;
+		}
+		else if (key_event->key() >= Qt::Key_Left && key_event->key() <= Qt::Key_Down || key_event->key() == Qt::Key_Return)
+		{
+			QApplication::sendEvent(m_HistoryView, event);
 			return true;
 		}
 	}
@@ -67,4 +72,9 @@ void PasteHistoryWindow::OnClipboardDataChanged(const std::string& text)
 	const size_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(duration_since_epoch).count();
 
 	m_HistoryView->AddToHistory(text, timestamp);
+}
+
+void PasteHistoryWindow::OnPasteRequested(std::string_view text)
+{
+	
 }

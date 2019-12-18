@@ -62,22 +62,30 @@ inline bool IsSourceFile(std::string_view str)
 	if (str[str.length() - 4] == '.')
 	{
 		const size_t extension_start = str.length() - 4;
-		if (std::strncmp(str.data() + extension_start, "cpp", 3))
+		if (std::strncmp(str.data() + extension_start, "cpp", 3) != 0)
+		{
 			return true;
+		}
 	}
 	else if (str[str.length() - 3] == '.')
 	{
 		const size_t extension_start = str.length() - 3;
-		if (std::strncmp(str.data() + extension_start, "py", 2))
+		if (std::strncmp(str.data() + extension_start, "py", 2) != 0)
+		{
 			return true;
+		}
 
-		if (std::strncmp(str.data() + extension_start, "cs", 2))
+		if (std::strncmp(str.data() + extension_start, "cs", 2) != 0)
+		{
 			return true;
+		}
 	}
-	else if(str[str.length() - 2] == '.')
+	else if (str[str.length() - 2] == '.')
 	{
 		if (str[str.length() - 1] == 'c')
+		{
 			return true;
+		}
 	}
 
 	return false;
@@ -283,7 +291,7 @@ bool SearchResultComparator(const SearchResult& lhs, const SearchResult& rhs) no
 	{
 		return true;
 	}
-	else if (lhs.m_PatternMatch.m_Score == rhs.m_PatternMatch.m_Score)
+	if (lhs.m_PatternMatch.m_Score == rhs.m_PatternMatch.m_Score)
 	{
 		return lhs.m_String.size() < rhs.m_String.size();
 	}
