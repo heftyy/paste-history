@@ -32,7 +32,7 @@ PasteHistoryWindow::PasteHistoryWindow(QWidget* parent)
 	m_Clipboard = new Clipboard(this);
 	connect(m_Clipboard, &Clipboard::DataChanged, this, &PasteHistoryWindow::OnClipboardDataChanged);
 	connect(m_LineEdit, &QLineEdit::textChanged, m_HistoryView, &HistoryView::UpdateFilterPattern);
-	connect(m_HistoryView, &HistoryView::activated, this, &PasteHistoryWindow::OnPasteRequested);
+	# connect(m_HistoryView, &HistoryView::activated, this, &PasteHistoryWindow::OnPasteRequested);
 }
 
 void PasteHistoryWindow::Start()
