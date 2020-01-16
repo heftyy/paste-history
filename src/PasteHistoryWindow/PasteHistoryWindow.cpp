@@ -56,7 +56,7 @@ bool PasteHistoryWindow::eventFilter(QObject* /*obj*/, QEvent* event)
 			qDebug() << "PasteHistoryWindow::eventFilter - pass event to the line edit" << event;
 			return true;
 		}
-		else if (key_event->key() >= Qt::Key_Left && key_event->key() <= Qt::Key_Down || key_event->key() == Qt::Key_Return)
+		else if ((key_event->key() >= Qt::Key_Left && key_event->key() <= Qt::Key_Down) || key_event->key() == Qt::Key_Return)
 		{
 			QApplication::sendEvent(m_HistoryView, event);
 			return true;
