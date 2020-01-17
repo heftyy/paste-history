@@ -10,12 +10,15 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:beineri/opt-qt-5.13.2-bionic'
     packages:
       - g++-7
+      - qt513base
+      - qt513tools
 
 before_install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-7" CC="gcc-7"; fi
-  - sudo apt-get install qtbase5-dev qtdeclarative5-dev
+  # - sudo apt-get install qtbase5-dev qtdeclarative5-dev
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
   - ./bootstrap-vcpkg.sh
