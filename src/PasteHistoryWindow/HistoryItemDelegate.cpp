@@ -60,7 +60,7 @@ static void DrawLabelWithHighlightedMatch(QPainter* painter, const QString& labe
 	int fragment_start = 0;
 	int fragment_end = 0;
 	int current_width = 0;
-	for (int i = 0; i < matches.size(); ++i)
+	for (size_t i = 0; i < matches.size(); ++i)
 	{
 		int match = matches[i];
 
