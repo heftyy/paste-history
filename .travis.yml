@@ -24,6 +24,7 @@ before_install:
   - ./bootstrap-vcpkg.sh
   - ./vcpkg install gtest benchmark ms-gsl
   - export VCPKG_ROOT=$(pwd)
+  - export CMAKE_PREFIX_PATH=/opt/qt513/
   - cd ..
 before_script:
   - mkdir build
