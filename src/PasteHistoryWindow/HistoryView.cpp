@@ -5,7 +5,7 @@
 #include <QKeyEvent>
 #include <QScreen>
 #include <QStandardItemModel>
-#include <QTooltip>
+#include <QToolTip>
 
 #include "HistoryItemDelegate.h"
 #include "HistoryItemModel.h"
