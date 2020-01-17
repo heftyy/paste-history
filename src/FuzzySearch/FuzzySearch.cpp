@@ -216,10 +216,11 @@ PatternMatch FuzzyMatch(InputPattern& input_pattern, std::string_view str, Match
 	std::vector<PatternMatch>& pattern_matches = input_pattern.m_PatternMatches;
 	std::vector<int>& match_indexes = input_pattern.m_MatchIndexes;
 
-	int last_path_separator_index = 0;
+	int filename_start_index = 0;
 	if (match_mode == MatchMode::E_SOURCE_FILES || match_mode == MatchMode::E_FILENAMES)
 	{
-		last_path_separator_index = static_cast<int>(str.find_last_of("\\/"));
+		auto found_separator = str.find_last_of("\\/");
+		filename_start_index = static_cast<int>(found_separator) + 1;
 	}
 
 	int str_start = 0;
@@ -262,7 +263,7 @@ PatternMatch FuzzyMatch(InputPattern& input_pattern, std::string_view str, Match
 					// Skip searching for matches in str that we already used in our currect best match, doing this to improve performance
 					// -1 because we will increment str_index at the end of the loop
 					str_index += best_match_length - 1;
-					str_start = str_index;
+					str_start = str_index + 1;
 				}
 			}
 		}
