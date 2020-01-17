@@ -4,7 +4,7 @@ compiler:
   - gcc
 
 sudo: required
-dist: xenial
+dist: bionic
 
 addons:
   apt:
