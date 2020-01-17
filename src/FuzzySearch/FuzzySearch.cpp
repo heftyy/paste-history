@@ -250,7 +250,7 @@ PatternMatch FuzzyMatch(InputPattern& input_pattern, std::string_view str, Match
 				std::iota(match_indexes.begin(), match_indexes.begin() + match_length, str_index);
 
 				const auto match_span = gsl::span<int>(match_indexes.data(), match_length);
-				const int match_score = CalculateSequentialMatchScore(str, last_path_separator_index, match_mode, match_span);
+				const int match_score = CalculateSequentialMatchScore(str, filename_start_index, match_mode, match_span);
 
 				if (match_score > pattern_matches[pattern_index].m_Score)
 				{
